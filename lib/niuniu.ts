@@ -279,7 +279,9 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
           // Sort groups to ensure uniqueness
           const tGroup = [...validBaseConfig].sort((a, b) => a - b);
           const pGroup = [p0, p1].sort((a, b) => a - b);
-          const uniqueKey = `B:${tGroup.join(",")}|P:${pGroup.join(",")}`;
+          const uniqueKey = `B:${tGroup.join(",")}|P:${pGroup.join(
+            ","
+          )}|S:${isStrictPair}`;
 
           if (!startKeys.has(uniqueKey)) {
             startKeys.add(uniqueKey);
