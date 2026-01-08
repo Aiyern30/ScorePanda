@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { findDFSExpressions } from "@/lib/solver";
 
 type Suit = "hearts" | "diamonds" | "clubs" | "spades";
 type Value =
@@ -58,8 +59,10 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`relative w-20 h-28 bg-white rounded-lg border-2 cursor-pointer transition-all transform hover:scale-105 ${
-        isSelected ? "border-blue-500 shadow-lg scale-105" : "border-gray-300"
+      className={`relative w-20 h-28 bg-linear-to-br from-yellow-50 to-white rounded-lg border-2 cursor-pointer transition-all transform hover:scale-105 shadow-md ${
+        isSelected
+          ? "border-red-600 shadow-xl scale-105 ring-2 ring-yellow-400"
+          : "border-yellow-600"
       }`}
     >
       <div
@@ -84,64 +87,6 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
       </div>
     </div>
   );
-};
-
-// Solver function (converted from Python)
-const findDFSExpressions = (nums: number[], target: number): string[] => {
-  const results: string[] = [];
-
-  const isClose = (a: number, b: number, tolerance = 1e-6) => {
-    return Math.abs(a - b) < tolerance;
-  };
-
-  const dfs = (currentNums: number[], exprs: string[]) => {
-    if (currentNums.length === 1) {
-      if (isClose(currentNums[0], target)) {
-        results.push(exprs[0]);
-      }
-      return;
-    }
-
-    const n = currentNums.length;
-    for (let i = 0; i < n; i++) {
-      for (let j = i + 1; j < n; j++) {
-        const a = currentNums[i];
-        const b = currentNums[j];
-        const exprA = exprs[i];
-        const exprB = exprs[j];
-
-        // Fix: ensure remaining is number[]
-        const remaining = currentNums
-          .map((num, k) => (k !== i && k !== j ? num : undefined))
-          .filter((num): num is number => num !== undefined);
-
-        const remainingExprs = exprs
-          .map((expr, k) => (k !== i && k !== j ? expr : undefined))
-          .filter((expr): expr is string => expr !== undefined);
-
-        const operations: [number, string][] = [
-          [a + b, `(${exprA} + ${exprB})`],
-          [a - b, `(${exprA} - ${exprB})`],
-          [b - a, `(${exprB} - ${exprA})`],
-          [a * b, `(${exprA} * ${exprB})`],
-        ];
-
-        if (b !== 0) {
-          operations.push([a / b, `(${exprA} / ${exprB})`]);
-        }
-        if (a !== 0) {
-          operations.push([b / a, `(${exprB} / ${exprA})`]);
-        }
-
-        for (const [val, exprStr] of operations) {
-          dfs([...remaining, val], [...remainingExprs, exprStr]);
-        }
-      }
-    }
-  };
-
-  dfs(nums, nums.map(String));
-  return results;
 };
 
 const Card24Game: React.FC = () => {
@@ -223,21 +168,45 @@ const Card24Game: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-green-700 to-green-900 p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-white text-center mb-8">
-          24 Card Game Solver
-        </h1>
+    <div className="min-h-screen bg-linear-to-br from-red-600 via-red-700 to-yellow-600 p-8 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-10 left-10 text-9xl animate-bounce">
+          🏮
+        </div>
+        <div className="absolute top-20 right-20 text-9xl animate-pulse">
+          🧧
+        </div>
+        <div className="absolute bottom-20 left-20 text-9xl animate-bounce">
+          🐉
+        </div>
+        <div className="absolute bottom-10 right-10 text-9xl animate-pulse">
+          🏮
+        </div>
+        <div className="absolute top-1/2 left-1/4 text-7xl">✨</div>
+        <div className="absolute top-1/3 right-1/4 text-7xl">🎊</div>
+      </div>
 
-        <Card className="mb-6">
+      <div className="max-w-6xl mx-auto relative z-10">
+        <div className="text-center mb-8">
+          <h1 className="text-5xl font-bold text-yellow-300 drop-shadow-lg mb-2">
+            🎴 算24点游戏 🎴
+          </h1>
+          <p className="text-2xl text-yellow-200 font-semibold">
+            24 Point Card Game Solver
+          </p>
+        </div>
+
+        <Card className="mb-6 bg-linear-to-br from-red-50 to-yellow-50 border-4 border-yellow-500 shadow-2xl">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Selected Cards ({selectedCards.length}/5)
+            <h2 className="text-2xl font-bold mb-2 text-red-700">
+              🀄 已选卡牌 ({selectedCards.length}/5)
             </h2>
-            <div className="flex gap-4 mb-4 min-h-32 items-center">
+            <p className="text-sm text-red-600 mb-4">Selected Cards</p>
+            <div className="flex gap-4 mb-4 min-h-32 items-center flex-wrap">
               {selectedCards.length === 0 ? (
-                <p className="text-gray-500">
-                  Click on cards below to select them
+                <p className="text-red-500 font-semibold">
+                  👇 点击下方卡牌进行选择 / Click cards below to select
                 </p>
               ) : (
                 selectedCards.map((card, idx) => (
@@ -256,34 +225,46 @@ const Card24Game: React.FC = () => {
               <Button
                 onClick={calculateSolutions}
                 disabled={selectedCards.length !== 5 || isCalculating}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-yellow-100 font-bold text-lg border-2 border-yellow-400 shadow-lg"
               >
-                {isCalculating ? "Calculating..." : "Find Solutions"}
+                {isCalculating
+                  ? "🔮 计算中... / Calculating..."
+                  : "🎯 寻找解答 / Find Solutions"}
               </Button>
-              <Button onClick={resetGame} variant="outline">
-                Reset
+              <Button
+                onClick={resetGame}
+                className="bg-linear-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-red-800 font-bold text-lg border-2 border-red-500 shadow-lg"
+              >
+                🔄 重置 / Reset
               </Button>
             </div>
           </CardContent>
         </Card>
 
         {solutions.length > 0 && (
-          <Card className="mb-6">
+          <Card className="mb-6 bg-linear-to-br from-yellow-50 to-red-50 border-4 border-red-500 shadow-2xl">
             <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                Solutions Found: {solutions.length}
+              <h2 className="text-2xl font-bold mb-2 text-red-700">
+                ✨ 找到 {solutions.length} 个解答
               </h2>
+              <p className="text-sm text-red-600 mb-4">
+                Solutions Found: {solutions.length}
+              </p>
               <div className="max-h-96 overflow-y-auto space-y-2">
                 {solutions.slice(0, 50).map((solution, idx) => (
-                  <Alert key={idx}>
-                    <AlertDescription className="font-mono text-sm">
+                  <Alert
+                    key={idx}
+                    className="bg-white border-2 border-yellow-400"
+                  >
+                    <AlertDescription className="font-mono text-sm text-red-800 font-semibold">
                       {solution}
                     </AlertDescription>
                   </Alert>
                 ))}
                 {solutions.length > 50 && (
-                  <p className="text-gray-600 text-sm mt-4">
-                    Showing first 50 of {solutions.length} solutions
+                  <p className="text-red-700 text-sm mt-4 font-semibold">
+                    📋 显示前50个，共 {solutions.length} 个解答 / Showing first
+                    50 of {solutions.length} solutions
                   </p>
                 )}
               </div>
@@ -291,11 +272,12 @@ const Card24Game: React.FC = () => {
           </Card>
         )}
 
-        <Card>
+        <Card className="bg-linear-to-br from-yellow-50 to-red-50 border-4 border-yellow-500 shadow-2xl">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Select Cards from Deck
+            <h2 className="text-2xl font-bold mb-2 text-red-700">
+              🎴 选择卡牌
             </h2>
+            <p className="text-sm text-red-600 mb-4">Select Cards from Deck</p>
             <div className="grid grid-cols-13 gap-2">
               {deck.map((card, idx) => {
                 const isSelected = selectedCards.some(
