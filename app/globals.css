@@ -62,3 +62,44 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Chinese New Year Themed Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #dc2626 #fef3c7;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: linear-gradient(to bottom, #fef3c7, #fde68a);
+  border-radius: 10px;
+  border: 2px solid #fbbf24;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+  border-radius: 10px;
+  border: 2px solid #fbbf24;
+  transition: all 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 50%, #7f1d1d 100%);
+  border-color: #f59e0b;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 50%, #dc2626 100%);
+}
+
+/* Scrollbar corner */
+*::-webkit-scrollbar-corner {
+  background: linear-gradient(to bottom right, #fef3c7, #fde68a);
+  border: 2px solid #fbbf24;
+}

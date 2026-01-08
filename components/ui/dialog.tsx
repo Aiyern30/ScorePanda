@@ -272,7 +272,7 @@ export function RulesDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="p-0 gap-0 bg-linear-to-br from-red-50 to-yellow-50 border-4 border-red-500 w-[calc(100%-1rem)] max-w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] sm:max-w-[90vw] md:max-w-2xl lg:max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
+        className="p-0 gap-0 bg-linear-to-br from-red-50 to-yellow-50 border-4 border-red-500 w-[calc(100%-1rem)] max-w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] sm:max-w-[90vw] md:max-w-2xl lg:max-w-4xl max-h-[90vh] flex! flex-col! overflow-hidden"
         showCloseButton={true}
       >
         {/* Fixed Header */}
