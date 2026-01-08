@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import * as React from "react";
@@ -145,36 +146,166 @@ export {
 interface RulesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  gameType: "numbersolver" | "niuniu";
 }
 
-export function RulesDialog({ open, onOpenChange }: RulesDialogProps) {
+export function RulesDialog({
+  open,
+  onOpenChange,
+  gameType,
+}: RulesDialogProps) {
+  const renderNumberSolverRules = () => (
+    <>
+      <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          🎯 目标 / Objective
+        </h3>
+        <p className="text-gray-700">
+          使用选定的卡牌数字，通过加、减、乘、除四则运算，得出目标数字。
+        </p>
+        <p className="text-gray-600 text-sm mt-2">
+          Use the numbers from selected cards with addition (+), subtraction
+          (-), multiplication (x), and division (÷) to reach the target number.
+        </p>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          📝 游戏步骤 / How to Play
+        </h3>
+        <ol className="list-decimal list-inside space-y-2 text-gray-700">
+          <li>
+            <strong>设置目标数字：</strong>输入你想要达到的数字(默认为24)
+            <br />
+            <span className="text-sm text-gray-600">
+              Set target number: Enter the number you want to reach (default is
+              24)
+            </span>
+          </li>
+          <li>
+            <strong>选择卡牌：</strong>从牌组中选择至少2张卡牌
+            <br />
+            <span className="text-sm text-gray-600">
+              Select cards: Choose at least 2 cards from the deck
+            </span>
+          </li>
+          <li>
+            <strong>寻找解答：</strong>
+            点击"寻找解答"按钮，系统会自动计算所有可能的解法
+            <br />
+            <span className="text-sm text-gray-600">
+              Find solutions: Click "Find Solutions" and the system will
+              calculate all possible solutions
+            </span>
+          </li>
+        </ol>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          🃏 卡牌数值 / Card Values
+        </h3>
+        <ul className="space-y-1 text-gray-700">
+          <li>• A = 1</li>
+          <li>• 2-10 = 面值 / Face value</li>
+          <li>• J = 11</li>
+          <li>• Q = 12</li>
+          <li>• K = 13</li>
+        </ul>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          💡 示例 / Example
+        </h3>
+        <p className="text-gray-700">
+          选择卡牌：3, 3, 8, 8 | 目标：24
+          <br />
+          <span className="text-sm text-gray-600">
+            Selected cards: 3, 3, 8, 8 | Target: 24
+          </span>
+        </p>
+        <p className="font-mono text-sm text-red-700 mt-2 bg-yellow-50 p-2 rounded">
+          解答 / Solution: (8 / (3 - (8 / 3))) = 24
+        </p>
+      </div>
+
+      <div className="bg-linear-to-r from-red-100 to-yellow-100 p-4 rounded-lg border-2 border-red-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          ⚠️ 注意事项 / Notes
+        </h3>
+        <ul className="space-y-1 text-gray-700 text-sm">
+          <li>• 每张卡牌只能使用一次 / Each card can only be used once</li>
+          <li>
+            • 可以使用任意数量的括号 / You can use any number of parentheses
+          </li>
+          <li>• 所有数字都必须使用 / All numbers must be used</li>
+          <li>
+            • 系统会显示最多50个解答 / System will display up to 50 solutions
+          </li>
+        </ul>
+      </div>
+    </>
+  );
+
+  const renderNiuNiuRules = () => (
+    <>
+      <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          🎯 目标 / Objective
+        </h3>
+        <p className="text-gray-700">牛牛游戏规则说明</p>
+        <p className="text-gray-600 text-sm mt-2">
+          NiuNiu game rules explanation
+        </p>
+      </div>
+      {/* Add more NiuNiu specific rules here */}
+    </>
+  );
+
+  const gameTitle =
+    gameType === "numbersolver"
+      ? "🎴 数字计算游戏规则 / Number Calculation Game Rules"
+      : "🐂 牛牛游戏规则 / NiuNiu Game Rules";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-106.25">
-        <DialogHeader>
-          <DialogTitle className="text-center">Game Rules</DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="mt-2 text-center">
-          <p className="text-sm text-gray-600">
-            The goal of the game is to solve the puzzle by filling in the
-            missing numbers. Use the clues provided to you to figure out the
-            correct numbers for each empty space.
-          </p>
-          <p className="mt-4 text-sm text-gray-600">
-            Each row, column, and section must contain all of the numbers
-            without repeating any. Pay attention to the given numbers as they
-            will help you deduce the placement of the other numbers.
-          </p>
-          <p className="mt-4 text-sm text-gray-600">
-            If you get stuck, you can use the hint button to reveal a correct
-            number in the puzzle. However, use hints sparingly as they are
-            limited.
-          </p>
-          <p className="mt-4 text-sm text-gray-600">
-            Once you think you have solved the puzzle, press the submit button
-            to check your solution. Good luck and have fun!
-          </p>
-        </DialogDescription>
+      <DialogContent
+        className="bg-linear-to-br from-red-50 to-yellow-50 border-4 border-red-500 p-0 gap-0 max-w-[95vw] sm:max-w-[90vw] md:max-w-2xl lg:max-w-4xl max-h-[90vh] flex flex-col"
+        showCloseButton={true}
+      >
+        {/* Fixed Header */}
+        <div className="p-4 sm:p-6 border-b-2 border-red-300 shrink-0">
+          <DialogHeader>
+            <DialogTitle className="text-2xl sm:text-3xl text-red-700 text-center">
+              {gameTitle}
+            </DialogTitle>
+            <DialogDescription className="text-sm sm:text-base text-red-600 text-center">
+              {gameType === "numbersolver"
+                ? "How to use the Number Calculation Game Solver"
+                : "How to play NiuNiu"}
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="overflow-y-auto flex-1 p-4 sm:p-6">
+          <div className="space-y-4">
+            {gameType === "numbersolver"
+              ? renderNumberSolverRules()
+              : renderNiuNiuRules()}
+          </div>
+        </div>
+
+        {/* Fixed Footer */}
+        <div className="p-4 sm:p-6 border-t-2 border-red-300 text-center shrink-0">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-yellow-100 font-bold text-base sm:text-lg border-2 border-yellow-400 shadow-lg px-6 py-3 rounded-lg transition-all hover:scale-105"
+          >
+            ✅ 明白了 / Got It!
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import React, { useState } from "react";
@@ -6,13 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { findDFSExpressions } from "@/lib/solver";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { RulesDialog } from "@/components/ui/dialog";
 
 type Suit = "hearts" | "diamonds" | "clubs" | "spades";
 type Value =
@@ -220,125 +213,11 @@ const Card24Game: React.FC = () => {
         </div>
 
         {/* Rules Dialog */}
-        <Dialog open={showRules} onOpenChange={setShowRules}>
-          <DialogContent className="bg-linear-to-br from-red-50 to-yellow-50 border-4 border-red-500">
-            <DialogHeader>
-              <DialogTitle className="text-3xl text-red-700 text-center">
-                🎴 游戏规则 / Game Rules
-              </DialogTitle>
-              <DialogDescription className="text-base text-red-600">
-                How to use the Number Calculation Game Solver
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 text-left">
-              <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
-                <h3 className="text-xl font-bold text-red-700 mb-2">
-                  🎯 目标 / Objective
-                </h3>
-                <p className="text-gray-700">
-                  使用选定的卡牌数字，通过加、减、乘、除四则运算，得出目标数字。
-                </p>
-                <p className="text-gray-600 text-sm mt-2">
-                  Use the numbers from selected cards with addition (+),
-                  subtraction (-), multiplication (×), and division (÷) to reach
-                  the target number.
-                </p>
-              </div>
-
-              <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
-                <h3 className="text-xl font-bold text-red-700 mb-2">
-                  📝 游戏步骤 / How to Play
-                </h3>
-                <ol className="list-decimal list-inside space-y-2 text-gray-700">
-                  <li>
-                    <strong>设置目标数字：</strong>
-                    输入你想要达到的数字（默认为24）
-                    <br />
-                    <span className="text-sm text-gray-600">
-                      Set target number: Enter the number you want to reach
-                      (default is 24)
-                    </span>
-                  </li>
-                  <li>
-                    <strong>选择卡牌：</strong>从牌组中选择至少2张卡牌
-                    <br />
-                    <span className="text-sm text-gray-600">
-                      Select cards: Choose at least 2 cards from the deck
-                    </span>
-                  </li>
-                  <li>
-                    <strong>寻找解答：</strong>
-                    点击"寻找解答"按钮，系统会自动计算所有可能的解法
-                    <br />
-                    <span className="text-sm text-gray-600">
-                      Find solutions: Click "Find Solutions" and the system will
-                      calculate all possible solutions
-                    </span>
-                  </li>
-                </ol>
-              </div>
-
-              <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
-                <h3 className="text-xl font-bold text-red-700 mb-2">
-                  🃏 卡牌数值 / Card Values
-                </h3>
-                <ul className="space-y-1 text-gray-700">
-                  <li>• A = 1</li>
-                  <li>• 2-10 = 面值 / Face value</li>
-                  <li>• J = 11</li>
-                  <li>• Q = 12</li>
-                  <li>• K = 13</li>
-                </ul>
-              </div>
-
-              <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
-                <h3 className="text-xl font-bold text-red-700 mb-2">
-                  💡 示例 / Example
-                </h3>
-                <p className="text-gray-700">
-                  选择卡牌：3, 3, 8, 8 | 目标：24
-                  <br />
-                  <span className="text-sm text-gray-600">
-                    Selected cards: 3, 3, 8, 8 | Target: 24
-                  </span>
-                </p>
-                <p className="font-mono text-sm text-red-700 mt-2 bg-yellow-50 p-2 rounded">
-                  解答 / Solution: (8 / (3 - (8 / 3))) = 24
-                </p>
-              </div>
-
-              <div className="bg-linear-to-r from-red-100 to-yellow-100 p-4 rounded-lg border-2 border-red-400">
-                <h3 className="text-xl font-bold text-red-700 mb-2">
-                  ⚠️ 注意事项 / Notes
-                </h3>
-                <ul className="space-y-1 text-gray-700 text-sm">
-                  <li>
-                    • 每张卡牌只能使用一次 / Each card can only be used once
-                  </li>
-                  <li>
-                    • 可以使用任意数量的括号 / You can use any number of
-                    parentheses
-                  </li>
-                  <li>• 所有数字都必须使用 / All numbers must be used</li>
-                  <li>
-                    • 系统会显示最多50个解答 / System will display up to 50
-                    solutions
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="mt-6 text-center">
-              <Button
-                onClick={() => setShowRules(false)}
-                className="bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-yellow-100 font-bold text-lg border-2 border-yellow-400 shadow-lg"
-              >
-                ✅ 明白了 / Got It!
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <RulesDialog
+          open={showRules}
+          onOpenChange={setShowRules}
+          gameType="numbersolver"
+        />
 
         <Card className="mb-4 sm:mb-6 bg-linear-to-br from-red-50 to-yellow-50 border-2 sm:border-4 border-yellow-500 shadow-2xl">
           <CardContent className="p-4 sm:p-6">
