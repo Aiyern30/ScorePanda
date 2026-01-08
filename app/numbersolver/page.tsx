@@ -93,6 +93,7 @@ const Card24Game: React.FC = () => {
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
   const [solutions, setSolutions] = useState<string[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [targetNumber, setTargetNumber] = useState<number>(24);
 
   // Generate deck of cards
   const suits: Suit[] = ["hearts", "diamonds", "clubs", "spades"];
@@ -139,14 +140,14 @@ const Card24Game: React.FC = () => {
       setSelectedCards(
         selectedCards.filter((c) => `${c.suit}-${c.value}` !== cardKey)
       );
-    } else if (selectedCards.length < 5) {
+    } else {
       setSelectedCards([...selectedCards, card]);
     }
   };
 
   const calculateSolutions = () => {
-    if (selectedCards.length !== 5) {
-      alert("Please select exactly 5 cards");
+    if (selectedCards.length < 2) {
+      alert("请至少选择2张卡牌 / Please select at least 2 cards");
       return;
     }
 
@@ -156,7 +157,7 @@ const Card24Game: React.FC = () => {
     // Use setTimeout to prevent UI blocking
     setTimeout(() => {
       const nums = selectedCards.map((c) => c.numericValue);
-      const results = findDFSExpressions(nums, 24);
+      const results = findDFSExpressions(nums, targetNumber);
       setSolutions(results);
       setIsCalculating(false);
     }, 100);
@@ -190,19 +191,34 @@ const Card24Game: React.FC = () => {
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-yellow-300 drop-shadow-lg mb-2">
-            🎴 算24点游戏 🎴
+            🎴 数字计算游戏 🎴
           </h1>
           <p className="text-2xl text-yellow-200 font-semibold">
-            24 Point Card Game Solver
+            Number Calculation Game Solver
           </p>
         </div>
 
         <Card className="mb-6 bg-linear-to-br from-red-50 to-yellow-50 border-4 border-yellow-500 shadow-2xl">
           <CardContent className="p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-2 text-red-700">
+                🎯 目标数字 / Target Number
+              </h2>
+              <input
+                type="number"
+                value={targetNumber}
+                onChange={(e) => setTargetNumber(Number(e.target.value))}
+                className="w-full max-w-xs px-4 py-3 text-2xl font-bold text-center border-4 border-red-500 rounded-lg bg-yellow-50 text-red-700 focus:outline-none focus:ring-4 focus:ring-yellow-400"
+                placeholder="输入目标数字"
+              />
+            </div>
+
             <h2 className="text-2xl font-bold mb-2 text-red-700">
-              🀄 已选卡牌 ({selectedCards.length}/5)
+              🀄 已选卡牌 ({selectedCards.length})
             </h2>
-            <p className="text-sm text-red-600 mb-4">Selected Cards</p>
+            <p className="text-sm text-red-600 mb-4">
+              Selected Cards (minimum 2)
+            </p>
             <div className="flex gap-4 mb-4 min-h-32 items-center flex-wrap">
               {selectedCards.length === 0 ? (
                 <p className="text-red-500 font-semibold">
@@ -224,7 +240,7 @@ const Card24Game: React.FC = () => {
             <div className="flex gap-4">
               <Button
                 onClick={calculateSolutions}
-                disabled={selectedCards.length !== 5 || isCalculating}
+                disabled={selectedCards.length < 2 || isCalculating}
                 className="bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-yellow-100 font-bold text-lg border-2 border-yellow-400 shadow-lg"
               >
                 {isCalculating
@@ -271,6 +287,21 @@ const Card24Game: React.FC = () => {
             </CardContent>
           </Card>
         )}
+
+        {solutions.length === 0 &&
+          selectedCards.length >= 2 &&
+          !isCalculating && (
+            <Card className="mb-6 bg-linear-to-br from-red-50 to-yellow-50 border-4 border-red-500 shadow-2xl">
+              <CardContent className="p-6">
+                <h2 className="text-2xl font-bold mb-2 text-red-700">
+                  ❌ 未找到解答
+                </h2>
+                <p className="text-sm text-red-600">
+                  No solutions found for target {targetNumber}
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
         <Card className="bg-linear-to-br from-yellow-50 to-red-50 border-4 border-yellow-500 shadow-2xl">
           <CardContent className="p-6">
