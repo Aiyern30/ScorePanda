@@ -255,12 +255,155 @@ export function RulesDialog({
         <h3 className="text-xl font-bold text-red-700 mb-2">
           🎯 目标 / Objective
         </h3>
-        <p className="text-gray-700">牛牛游戏规则说明</p>
+        <p className="text-gray-700">
+          使用5张牌，尝试组成三张牌总和为10的倍数，剩余两张牌的个位数决定"牛"的大小。
+        </p>
         <p className="text-gray-600 text-sm mt-2">
-          NiuNiu game rules explanation
+          Use 5 cards to form a group of 3 cards that sum to a multiple of 10.
+          The ones digit of the remaining 2 cards determines your "Niu" rank.
         </p>
       </div>
-      {/* Add more NiuNiu specific rules here */}
+
+      <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          🃏 卡牌数值 / Card Values
+        </h3>
+        <ul className="space-y-1 text-gray-700">
+          <li>• A (Ace) = 1 点</li>
+          <li>• 2-10 = 面值 / Face value</li>
+          <li>• J, Q, K = 10 点 / 10 points each</li>
+        </ul>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          📝 游戏步骤 / How to Play
+        </h3>
+        <ol className="list-decimal list-inside space-y-2 text-gray-700">
+          <li>
+            <strong>发牌：</strong>系统会发5张牌
+            <br />
+            <span className="text-sm text-gray-600">
+              Deal: System deals 5 cards
+            </span>
+          </li>
+          <li>
+            <strong>寻找组合：</strong>
+            系统会自动寻找三张牌总和为10的倍数的组合
+            <br />
+            <span className="text-sm text-gray-600">
+              Find combination: System finds 3 cards summing to multiple of 10
+            </span>
+          </li>
+          <li>
+            <strong>计算牛数：</strong>剩余两张牌的总和个位数就是你的"牛"
+            <br />
+            <span className="text-sm text-gray-600">
+              Calculate Niu: Ones digit of remaining 2 cards is your Niu rank
+            </span>
+          </li>
+        </ol>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          🏆 牌型排名 / Hand Rankings
+        </h3>
+        <div className="space-y-2 text-gray-700 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">💎</span>
+            <div>
+              <strong>五小牛 (1200分):</strong> 五张牌都小于5且总和≤10
+              <br />
+              <span className="text-gray-600">
+                Five Small: All cards under 5, sum ≤ 10
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">💎</span>
+            <div>
+              <strong>五花牛/炸弹 (1100分):</strong> 五张都是J/Q/K
+              <br />
+              <span className="text-gray-600">Five Face Cards: All J/Q/K</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🐂</span>
+            <div>
+              <strong>牛牛 (1000分):</strong> 两组都是10的倍数
+              <br />
+              <span className="text-gray-600">
+                Niu Niu: Both groups sum to multiples of 10
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🔥</span>
+            <div>
+              <strong>牛9 (990分):</strong> 剩余两张总和为19或29
+              <br />
+              <span className="text-gray-600">
+                Niu 9: Remaining cards sum to 19 or 29
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">✨</span>
+            <div>
+              <strong>牛8-牛1:</strong> 依次递减
+              <br />
+              <span className="text-gray-600">Niu 8 to Niu 1: Descending</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">😢</span>
+            <div>
+              <strong>没牛 (0分):</strong> 无法组成三张牌总和为10的倍数
+              <br />
+              <span className="text-gray-600">
+                No Niu: Cannot form valid combination
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          💡 示例 / Example
+        </h3>
+        <p className="text-gray-700 mb-2">手牌：K♥, Q♦, 5♣, 3♠, 2♥</p>
+        <div className="bg-yellow-50 p-3 rounded border border-yellow-300">
+          <p className="font-semibold text-red-700 mb-1">
+            三张牌组 / Three-card group:
+          </p>
+          <p className="font-mono text-sm text-gray-700">
+            K(10) + Q(10) + 5 = 25 → 总和为10的倍数 ✓
+          </p>
+          <p className="font-semibold text-red-700 mt-2 mb-1">
+            两张牌组 / Two-card group:
+          </p>
+          <p className="font-mono text-sm text-gray-700">
+            3 + 2 = 5 → 个位数 = 5
+          </p>
+          <p className="font-bold text-red-600 mt-2">
+            结果 / Result: 牛5 (Niu 5)
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-linear-to-r from-red-100 to-yellow-100 p-4 rounded-lg border-2 border-red-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          ⚠️ 注意事项 / Notes
+        </h3>
+        <ul className="space-y-1 text-gray-700 text-sm">
+          <li>• 系统会自动寻找最佳组合 / System finds best combination</li>
+          <li>• 金色边框显示三张牌组 / Gold border shows three-card group</li>
+          <li>• 红色边框显示两张牌组 / Red border shows two-card group</li>
+          <li>• 特殊牌型有更高分数 / Special hands have higher scores</li>
+        </ul>
+      </div>
     </>
   );
 
