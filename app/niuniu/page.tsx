@@ -94,6 +94,7 @@ const NiuNiuGame: React.FC = () => {
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
   const [result, setResult] = useState<NiuNiuResult | null>(null);
   const [showRules, setShowRules] = useState(false);
+  const [showAlternatives, setShowAlternatives] = useState(false);
 
   // Generate full deck
   const deck = generateDeck();
@@ -110,10 +111,12 @@ const NiuNiuGame: React.FC = () => {
         selectedCards.filter((c) => `${c.suit}-${c.value}` !== cardKey)
       );
       setResult(null); // Clear result when cards change
+      setShowAlternatives(false);
     } else if (selectedCards.length < 5) {
       // Add card (max 5)
       setSelectedCards([...selectedCards, card]);
       setResult(null); // Clear result when cards change
+      setShowAlternatives(false);
     }
   };
 
@@ -125,11 +128,13 @@ const NiuNiuGame: React.FC = () => {
 
     const evaluation = evaluateNiuNiuHand(selectedCards);
     setResult(evaluation);
+    setShowAlternatives(false);
   };
 
   const resetGame = () => {
     setSelectedCards([]);
     setResult(null);
+    setShowAlternatives(false);
   };
 
   const getResultColor = (result: NiuNiuResult) => {
@@ -313,34 +318,83 @@ const NiuNiuGame: React.FC = () => {
                   <div className="mt-4 grid grid-cols-1 gap-4">
                     {/* Swapped order: Two Cards (Red) First/Top */}
                     <div className="bg-red-100 p-3 rounded-lg border-2 border-red-400 shadow-inner">
-                      <h3 className="font-bold text-red-700 mb-2">
+                      <h3 className="font-bold text-red-700 mb-1">
                         两张牌组 (Double)
                       </h3>
-                      <p className="text-lg font-mono text-red-800">
-                        {result.twoCardGroup.join(" + ")} ={" "}
-                        {result.twoCardGroup.reduce((a, b) => a + b, 0)}
+                      {/* Simplified Display: Just Values */}
+                      <p className="text-4xl font-black text-red-800 tracking-wider">
+                        {result.twoCardGroup.join(" ")}
                       </p>
-                      <p className="text-sm text-red-600 mt-1">
-                        (Rank Points:{" "}
-                        {result.niuRank === 0 ? "10 (Niu Niu)" : result.niuRank}
-                        )
+                      <p className="text-sm text-red-600 font-semibold mt-1">
+                        {result.handType.includes("Double") ||
+                        result.niuRank === 0
+                          ? "Double / Pair"
+                          : "Sum: " +
+                            result.twoCardGroup.reduce((a, b) => a + b, 0)}
                       </p>
                     </div>
 
                     {/* Three Cards (Yellow) Second/Bottom */}
                     <div className="bg-yellow-100 p-3 rounded-lg border-2 border-yellow-400 shadow-inner">
-                      <h3 className="font-bold text-red-700 mb-2">
+                      <h3 className="font-bold text-yellow-800 mb-1">
                         三张牌组 (Base)
                       </h3>
-                      <p className="text-lg font-mono text-red-800">
-                        {result.threeCardGroup.join(" + ")} ={" "}
-                        {result.threeCardGroup.reduce((a, b) => a + b, 0)}
+                      {/* Simplified Display: Just Values */}
+                      <p className="text-3xl font-black text-yellow-900 tracking-wider">
+                        {result.threeCardGroup.join(" ")}
                       </p>
-                      <p className="text-sm text-red-600 mt-1">
-                        (Sum: {result.threeCardGroup.reduce((a, b) => a + b, 0)}{" "}
-                        - Multiple of 10)
+                      <p className="text-sm text-yellow-800 font-semibold mt-1">
+                        Multiple of 10
                       </p>
                     </div>
+
+                    {/* Alternatives Button */}
+                    {result.alternatives && result.alternatives.length > 0 && (
+                      <div className="mt-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowAlternatives(!showAlternatives)}
+                          className="w-full border-dashed border-2 border-gray-400 text-gray-700 hover:bg-gray-100"
+                        >
+                          {showAlternatives
+                            ? "Hide Other Ways"
+                            : `See Other Ways to Form Niu (${result.alternatives.length})`}
+                        </Button>
+
+                        {showAlternatives && (
+                          <div className="mt-3 grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-top-2">
+                            {result.alternatives.map((alt, i) => (
+                              <div
+                                key={i}
+                                className="bg-white p-3 rounded-lg border border-gray-300 shadow-sm text-left"
+                              >
+                                <div className="font-bold text-gray-800 mb-1">
+                                  {alt.handTypeZh} ({alt.handType})
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                  <div className="bg-red-50 p-1 rounded border border-red-100 text-center">
+                                    <span className="text-red-500 font-bold block text-xs">
+                                      Double
+                                    </span>
+                                    <span className="font-bold">
+                                      {alt.twoCardGroup.join(" ")}
+                                    </span>
+                                  </div>
+                                  <div className="bg-yellow-50 p-1 rounded border border-yellow-100 text-center">
+                                    <span className="text-yellow-600 font-bold block text-xs">
+                                      Base
+                                    </span>
+                                    <span className="font-bold text-gray-700">
+                                      {alt.threeCardGroup.join(" ")}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 

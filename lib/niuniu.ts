@@ -30,6 +30,7 @@ export interface NiuNiuResult {
   threeCardGroup: number[];
   twoCardGroup: number[];
   score: number; // For comparison
+  alternatives?: NiuNiuResult[];
 }
 
 // Get card value for Niu Niu
@@ -148,7 +149,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
 
   // Check for special hands first
   const specialHand = checkSpecialHands(cards);
-  if (specialHand) return specialHand;
+  if (specialHand) return specialHand; // Special hands have no alternatives usually
 
   const originalValues = cards.map((c) => c.numericValue);
 
@@ -165,8 +166,8 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
     return remainder === 0 ? 10 : remainder; // 10 represents Niu Niu
   };
 
-  let bestResult: NiuNiuResult | null = null;
-  let maxScore = -1;
+  const foundResults: (NiuNiuResult & { comparisonScore: number })[] = [];
+  const startKeys = new Set<string>(); // To deduplicate
 
   // Try all combinations of 3 cards for the base
   const combinations = getCombinations(originalValues);
@@ -188,14 +189,28 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
     let validBaseConfig: number[] | null = null;
     let validBase = false;
 
-    // Iterate through all base value permutations
-    // We just need one valid configuration for the base
+    // Check base validity
     for (const v0 of baseOptions0) {
       for (const v1 of baseOptions1) {
         for (const v2 of baseOptions2) {
           if ((v0 + v1 + v2) % 10 === 0) {
             validBase = true;
             validBaseConfig = [v0, v1, v2];
+
+            // Should we continue to find other base configs for same cards?
+            // Usually one valid base per combination is enough to define the split.
+            // But if 3(3) and 3(6) both work?
+            // E.g. 3, 3, 4. 3+3+4=10.
+            // If we stop, we might miss something?
+            // Actually, the pair determines the result.
+            // So if base is valid, we check pair.
+            // We should iterate ALL valid bases?
+            // "3, 3, 4" base. Pair X, Y.
+            // Result is determined by Pair.
+            // Does base configuration matter for result?
+            // Only for display "Base: 3+3+4".
+            // If multiple valid bases exist for SAME 3 cards, display doesn't change much.
+            // So finding FIRST valid base config for this combo is sufficient.
             break;
           }
         }
@@ -205,7 +220,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
     }
 
     if (validBase && validBaseConfig) {
-      // Base is valid. Now optimize the Pair.
+      // Base is valid. Evaluate Pair.
       const pairOptions0 = getPossibleValues(pairValues[0]);
       const pairOptions1 = getPossibleValues(pairValues[1]);
 
@@ -215,22 +230,23 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
           const rank = getRank(sum);
           const isPair = p0 === p1;
 
-          // Calculate comparison score
-          // Priority 1: Niu Niu (Rank 10) - Score 2000+
-          // Priority 2: Pair (Double) - Score 1000+ (beats Niu 9 which is ~90)
-          // Priority 3: Rank - Score * 10
-          // Tie-break: Sum
+          // Comparison Score Logic
+          let comparisonScore = 0;
+          if (rank === 10) comparisonScore += 2000;
+          if (isPair) comparisonScore += 1000;
+          comparisonScore += rank * 10;
+          comparisonScore += sum / 100;
 
-          let currentScore = 0;
-          if (rank === 10) currentScore += 2000;
-          if (isPair) currentScore += 1000;
-          currentScore += rank * 10;
-          currentScore += sum / 100; // Tiny tie-breaker
+          // Deduplicate based on effective values
+          // Sort groups to ensure uniqueness
+          const tGroup = [...validBaseConfig].sort((a, b) => a - b);
+          const pGroup = [p0, p1].sort((a, b) => a - b);
+          const uniqueKey = `B:${tGroup.join(",")}|P:${pGroup.join(",")}`;
 
-          if (currentScore > maxScore) {
-            maxScore = currentScore;
+          if (!startKeys.has(uniqueKey)) {
+            startKeys.add(uniqueKey);
 
-            const finalNiuRank = rank === 10 ? 0 : rank; // UI expects 0 for Niu Niu
+            const finalNiuRank = rank === 10 ? 0 : rank;
 
             let handType = "";
             let handTypeZh = "";
@@ -253,8 +269,8 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
               if (isPair) {
                 handType = `Niu ${finalNiuRank} (Double)`;
                 handTypeZh = `牛${finalNiuRank} (${p0}对)`;
-                description = `Double ${p0}s (Sum ${sum}), beats Niu 9!`;
-                descriptionZh = `${p0}对 (总和${sum})，大过牛9！`;
+                description = `Double ${p0}s (Sum ${sum})`;
+                descriptionZh = `${p0}对 (总和${sum})`;
               } else {
                 handType = `Niu ${finalNiuRank}`;
                 handTypeZh = `牛${finalNiuRank}`;
@@ -263,7 +279,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
               }
             }
 
-            bestResult = {
+            foundResults.push({
               hasNiu: true,
               niuRank: finalNiuRank,
               handType,
@@ -272,18 +288,29 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
               descriptionZh,
               threeCardGroup: validBaseConfig,
               twoCardGroup: [p0, p1],
-              score: Math.floor(rank === 10 ? 1000 : 900 + rank * 10), // Keep standard score for UI display or bump it?
-              // Standard score is for betting calculation. Usually Pair doesn't change multiplier unless it's a special rule.
-              // I'll keep the standard score calculation for now, but the SELECTION logic uses maxScore.
-            };
+              score: Math.floor(rank === 10 ? 1000 : 900 + rank * 10),
+              comparisonScore, // Internal use
+            });
           }
         }
       }
     }
   }
 
-  if (bestResult) {
-    return bestResult;
+  if (foundResults.length > 0) {
+    // Sort by comparisonScore descending
+    foundResults.sort((a, b) => b.comparisonScore - a.comparisonScore);
+
+    const best = foundResults[0];
+    // Attach alternatives (exclude self)
+    // We only attach clean NiuNiuResult objects (remove comparisonScore)
+    best.alternatives = foundResults.slice(1).map((r) => {
+      const { comparisonScore, ...rest } = r;
+      return rest;
+    });
+
+    // Return clean best (remove comparisonScore key? It's extra property, JS allows it, Interface ignores it. Safe)
+    return best;
   }
 
   // No Niu found
