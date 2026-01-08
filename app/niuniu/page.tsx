@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   generateDeck,
-  shuffleDeck,
-  dealCards,
   evaluateNiuNiuHand,
   type Card as CardType,
   type NiuNiuResult,
@@ -19,16 +17,20 @@ import { RulesDialog } from "@/components/ui/dialog";
 interface PlayingCardProps {
   suit: Suit;
   value: Value;
+  isSelected?: boolean;
   isHighlighted?: boolean;
   highlightColor?: "red" | "gold";
+  onClick?: () => void;
 }
 
 // Playing Card Component
 const PlayingCard: React.FC<PlayingCardProps> = ({
   suit,
   value,
+  isSelected = false,
   isHighlighted = false,
   highlightColor = "gold",
+  onClick,
 }) => {
   const suitSymbols = {
     hearts: "♥",
@@ -51,9 +53,14 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
 
   return (
     <div
-      className={`relative w-16 h-24 sm:w-20 sm:h-28 bg-linear-to-br from-yellow-50 to-white rounded-lg border-2 border-yellow-600 shadow-md transition-all duration-300 ${
-        isHighlighted ? highlightClasses[highlightColor] : ""
-      }`}
+      onClick={onClick}
+      className={`relative w-16 h-24 sm:w-20 sm:h-28 bg-linear-to-br from-yellow-50 to-white rounded-lg border-2 shadow-md transition-all duration-300 ${
+        onClick ? "cursor-pointer hover:scale-105" : ""
+      } ${
+        isSelected
+          ? "border-red-600 shadow-xl scale-105 ring-2 ring-yellow-400"
+          : "border-yellow-600"
+      } ${isHighlighted ? highlightClasses[highlightColor] : ""}`}
     >
       <div
         className="absolute top-0.5 left-0.5 sm:top-1 sm:left-1 text-xs sm:text-sm font-bold"
@@ -84,37 +91,44 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
 };
 
 const NiuNiuGame: React.FC = () => {
-  const [hand, setHand] = useState<CardType[]>([]);
+  const [selectedCards, setSelectedCards] = useState<CardType[]>([]);
   const [result, setResult] = useState<NiuNiuResult | null>(null);
   const [showRules, setShowRules] = useState(false);
-  const [isDealing, setIsDealing] = useState(false);
 
-  const dealNewHand = () => {
-    setIsDealing(true);
-    setResult(null);
+  // Generate full deck
+  const deck = generateDeck();
 
-    // Simulate dealing animation
-    setTimeout(() => {
-      const deck = generateDeck();
-      const shuffled = shuffleDeck(deck);
-      const newHand = dealCards(shuffled, 5);
-      setHand(newHand);
-      setIsDealing(false);
-    }, 300);
+  const handleCardClick = (card: CardType) => {
+    const cardKey = `${card.suit}-${card.value}`;
+    const isAlreadySelected = selectedCards.some(
+      (c) => `${c.suit}-${c.value}` === cardKey
+    );
+
+    if (isAlreadySelected) {
+      // Remove card
+      setSelectedCards(
+        selectedCards.filter((c) => `${c.suit}-${c.value}` !== cardKey)
+      );
+      setResult(null); // Clear result when cards change
+    } else if (selectedCards.length < 5) {
+      // Add card (max 5)
+      setSelectedCards([...selectedCards, card]);
+      setResult(null); // Clear result when cards change
+    }
   };
 
   const evaluateHand = () => {
-    if (hand.length !== 5) {
-      alert("请先发牌 / Please deal cards first");
+    if (selectedCards.length !== 5) {
+      alert("请选择5张牌 / Please select exactly 5 cards");
       return;
     }
 
-    const evaluation = evaluateNiuNiuHand(hand);
+    const evaluation = evaluateNiuNiuHand(selectedCards);
     setResult(evaluation);
   };
 
   const resetGame = () => {
-    setHand([]);
+    setSelectedCards([]);
     setResult(null);
   };
 
@@ -180,87 +194,44 @@ const NiuNiuGame: React.FC = () => {
           gameType="niuniu"
         />
 
-        {/* Game Controls */}
+        {/* Selected Cards Display */}
         <Card className="mb-4 sm:mb-6 bg-linear-to-br from-red-50 to-yellow-50 border-2 sm:border-4 border-yellow-500 shadow-2xl">
           <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center">
-              <Button
-                onClick={dealNewHand}
-                disabled={isDealing}
-                className="bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-yellow-100 font-bold text-base sm:text-lg border-2 border-yellow-400 shadow-lg w-full sm:w-auto"
-              >
-                {isDealing
-                  ? "🎴 发牌中... / Dealing..."
-                  : "🎴 发牌 / Deal Cards"}
-              </Button>
-              <Button
-                onClick={evaluateHand}
-                disabled={hand.length !== 5}
-                className="bg-linear-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-red-800 font-bold text-base sm:text-lg border-2 border-red-500 shadow-lg w-full sm:w-auto"
-              >
-                🎯 评估牌型 / Evaluate Hand
-              </Button>
-              <Button
-                onClick={resetGame}
-                className="bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-base sm:text-lg border-2 border-red-500 shadow-lg w-full sm:w-auto"
-              >
-                🔄 重置 / Reset
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Hand Display */}
-        {hand.length > 0 && (
-          <Card className="mb-4 sm:mb-6 bg-linear-to-br from-yellow-50 to-red-50 border-2 sm:border-4 border-red-500 shadow-2xl">
-            <CardContent className="p-4 sm:p-6">
-              <h2 className="text-xl sm:text-2xl font-bold mb-4 text-red-700 text-center">
-                🀄 你的手牌 / Your Hand
-              </h2>
-              <div className="flex gap-2 sm:gap-4 justify-center flex-wrap">
-                {hand.map((card, idx) => {
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-red-700">
+              🀄 已选卡牌 ({selectedCards.length}/5)
+            </h2>
+            <p className="text-xs sm:text-sm text-red-600 mb-4">
+              Selected Cards (select exactly 5)
+            </p>
+            <div className="flex gap-2 sm:gap-4 mb-4 min-h-24 sm:min-h-32 items-center flex-wrap">
+              {selectedCards.length === 0 ? (
+                <p className="text-sm sm:text-base text-red-500 font-semibold">
+                  👇 点击下方卡牌进行选择 / Click cards below to select
+                </p>
+              ) : (
+                selectedCards.map((card, idx) => {
                   let isHighlighted = false;
                   let highlightColor: "red" | "gold" = "gold";
 
                   if (result && result.hasNiu) {
                     // Highlight three-card group in gold
-                    if (
-                      result.threeCardGroup.includes(card.numericValue) &&
-                      result.threeCardGroup.filter(
-                        (v) => v === card.numericValue
-                      ).length > 0
-                    ) {
-                      const usedIndices: number[] = [];
-                      result.threeCardGroup.forEach((val) => {
-                        const foundIdx = hand.findIndex(
-                          (c, i) =>
-                            c.numericValue === val && !usedIndices.includes(i)
-                        );
-                        if (foundIdx !== -1) usedIndices.push(foundIdx);
-                      });
-                      if (usedIndices.includes(idx)) {
-                        isHighlighted = true;
-                        highlightColor = "gold";
-                      }
-                    }
+                    const usedThreeIndices: number[] = [];
+                    result.threeCardGroup.forEach((val) => {
+                      const foundIdx = selectedCards.findIndex(
+                        (c, i) =>
+                          c.numericValue === val &&
+                          !usedThreeIndices.includes(i)
+                      );
+                      if (foundIdx !== -1) usedThreeIndices.push(foundIdx);
+                    });
 
-                    // Highlight two-card group in red
-                    if (
-                      result.twoCardGroup.includes(card.numericValue) &&
-                      !isHighlighted
-                    ) {
-                      const usedIndices: number[] = [];
-                      result.threeCardGroup.forEach((val) => {
-                        const foundIdx = hand.findIndex(
-                          (c, i) =>
-                            c.numericValue === val && !usedIndices.includes(i)
-                        );
-                        if (foundIdx !== -1) usedIndices.push(foundIdx);
-                      });
-                      if (!usedIndices.includes(idx)) {
-                        isHighlighted = true;
-                        highlightColor = "red";
-                      }
+                    if (usedThreeIndices.includes(idx)) {
+                      isHighlighted = true;
+                      highlightColor = "gold";
+                    } else {
+                      // Must be in two-card group
+                      isHighlighted = true;
+                      highlightColor = "red";
                     }
                   }
 
@@ -271,25 +242,42 @@ const NiuNiuGame: React.FC = () => {
                       value={card.value}
                       isHighlighted={isHighlighted}
                       highlightColor={highlightColor}
+                      onClick={() => handleCardClick(card)}
                     />
                   );
-                })}
-              </div>
-              {result && result.hasNiu && (
-                <div className="mt-4 text-center text-sm text-red-600">
-                  <p>
-                    🟡 金色边框 = 三张牌组 (总和为10的倍数) / Gold = Three-card
-                    group (sum to 10)
-                  </p>
-                  <p>
-                    🔴 红色边框 = 两张牌组 (决定牛的大小) / Red = Two-card group
-                    (determines Niu rank)
-                  </p>
-                </div>
+                })
               )}
-            </CardContent>
-          </Card>
-        )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+              <Button
+                onClick={evaluateHand}
+                disabled={selectedCards.length !== 5}
+                className="bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-yellow-100 font-bold text-base sm:text-lg border-2 border-yellow-400 shadow-lg w-full sm:w-auto"
+              >
+                🎯 评估牌型 / Evaluate Hand
+              </Button>
+              <Button
+                onClick={resetGame}
+                className="bg-linear-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-red-800 font-bold text-base sm:text-lg border-2 border-red-500 shadow-lg w-full sm:w-auto"
+              >
+                🔄 重置 / Reset
+              </Button>
+            </div>
+            {result && result.hasNiu && (
+              <div className="mt-4 text-center text-sm text-red-600">
+                <p>
+                  🟡 金色边框 = 三张牌组 (总和为10的倍数) / Gold = Three-card
+                  group (sum to 10)
+                </p>
+                <p>
+                  🔴 红色边框 = 两张牌组 (决定牛的大小) / Red = Two-card group
+                  (determines Niu rank)
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Result Display */}
         {result && (
@@ -356,40 +344,33 @@ const NiuNiuGame: React.FC = () => {
           </Card>
         )}
 
-        {/* Instructions */}
-        {hand.length === 0 && !result && (
-          <Card className="bg-linear-to-br from-yellow-50 to-red-50 border-2 sm:border-4 border-yellow-500 shadow-2xl">
-            <CardContent className="p-4 sm:p-6 text-center">
-              <h2 className="text-xl sm:text-2xl font-bold mb-4 text-red-700">
-                👆 点击"发牌"开始游戏
-              </h2>
-              <p className="text-sm sm:text-base text-red-600">
-                Click "Deal Cards" to start playing
-              </p>
-              <div className="mt-6 text-left max-w-2xl mx-auto">
-                <h3 className="text-lg font-bold text-red-700 mb-2">
-                  快速指南 / Quick Guide:
-                </h3>
-                <ul className="space-y-2 text-sm sm:text-base text-gray-700">
-                  <li>
-                    🎴 <strong>发牌：</strong>系统会随机发5张牌
-                  </li>
-                  <li>
-                    🎯 <strong>评估：</strong>
-                    点击评估按钮查看你的牌型和得分
-                  </li>
-                  <li>
-                    🐂 <strong>目标：</strong>
-                    尝试组成三张牌总和为10的倍数，剩余两张牌决定牛的大小
-                  </li>
-                  <li>
-                    💎 <strong>特殊牌型：</strong>五花牛、五小牛等有更高分数
-                  </li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Card Deck */}
+        <Card className="bg-linear-to-br from-yellow-50 to-red-50 border-2 sm:border-4 border-yellow-500 shadow-2xl">
+          <CardContent className="p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-red-700">
+              🎴 选择卡牌
+            </h2>
+            <p className="text-xs sm:text-sm text-red-600 mb-4">
+              Select Cards from Deck (Click to select/deselect)
+            </p>
+            <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-13 gap-1 sm:gap-2">
+              {deck.map((card, idx) => {
+                const isSelected = selectedCards.some(
+                  (c) => c.suit === card.suit && c.value === card.value
+                );
+                return (
+                  <PlayingCard
+                    key={idx}
+                    suit={card.suit}
+                    value={card.value}
+                    isSelected={isSelected}
+                    onClick={() => handleCardClick(card)}
+                  />
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
