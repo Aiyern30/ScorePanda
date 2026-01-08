@@ -256,15 +256,29 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
             cards[pairIndices[0]].value === cards[pairIndices[1]].value;
           // Note: p0 === p1 checks numeric equality (10===10). We rely on isStrictPair for "Double" status.
 
+          // Spade Ace + Face Card Bonus Logic
+          const pCard0 = cards[pairIndices[0]];
+          const pCard1 = cards[pairIndices[1]];
+          const hasSpadeAce =
+            (pCard0.value === "A" && pCard0.suit === "spades") ||
+            (pCard1.value === "A" && pCard1.suit === "spades");
+          const hasFaceInPair =
+            ["J", "Q", "K"].includes(pCard0.value) ||
+            ["J", "Q", "K"].includes(pCard1.value);
+          const isSpadeAceFacePair = hasSpadeAce && hasFaceInPair;
+
           // Comparison Score Logic
-          // Priority: Double (Strict) > Niu Niu > Normal
+          // Priority: Supreme Spade Ace > Double (Strict) > Niu Niu > Normal
+          // Supreme: 5000
           // Double Base: 3000
           // Niu Niu Base: 2000
           // Normal Base: 1000
           let comparisonScore = 0;
           let rankScore = rank === 10 ? 10 : rank; // Treat Niu Niu as 10 for bonus
 
-          if (isStrictPair) {
+          if (isSpadeAceFacePair) {
+            comparisonScore += 5000;
+          } else if (isStrictPair) {
             comparisonScore += 3000;
           } else if (rank === 10) {
             comparisonScore += 2000;
@@ -293,7 +307,12 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
             let description = "";
             let descriptionZh = "";
 
-            if (finalNiuRank === 0) {
+            if (isSpadeAceFacePair) {
+              handType = "Supreme Spade Ace";
+              handTypeZh = "至尊黑桃A";
+              description = "Spade Ace with Face Card! Highest Rank!";
+              descriptionZh = "黑桃A配公仔牌！至尊大牌！";
+            } else if (finalNiuRank === 0) {
               if (isStrictPair) {
                 handType = "Niu Niu (Double)";
                 handTypeZh = `牛牛 (${p0}对)`;
@@ -321,7 +340,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
 
             foundResults.push({
               hasNiu: true,
-              niuRank: finalNiuRank,
+              niuRank: isSpadeAceFacePair ? 13 : finalNiuRank,
               handType,
               handTypeZh,
               description,
