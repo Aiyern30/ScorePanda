@@ -166,8 +166,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
   };
 
   let bestResult: NiuNiuResult | null = null;
-  let maxRank = -1;
-  let maxPairSum = -1; // Tiebreaker
+  let maxScore = -1;
 
   // Try all combinations of 3 cards for the base
   const combinations = getCombinations(originalValues);
@@ -182,7 +181,6 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
     const pairValues = pairIndices.map((i) => originalValues[i]);
 
     // Check if Base can resolve to multiple of 10
-    // We need to try all permutations of possible values for the base cards
     const baseOptions0 = getPossibleValues(baseValues[0]);
     const baseOptions1 = getPossibleValues(baseValues[1]);
     const baseOptions2 = getPossibleValues(baseValues[2]);
@@ -191,9 +189,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
     let validBase = false;
 
     // Iterate through all base value permutations
-    // Optimization: Stop at first valid base?
-    // Actually, does the choice of base values affect the pair? No, they are disjoint sets of cards.
-    // However, we just need *one* valid base configuration to proceed to check the pair.
+    // We just need one valid configuration for the base
     for (const v0 of baseOptions0) {
       for (const v1 of baseOptions1) {
         for (const v2 of baseOptions2) {
@@ -213,105 +209,74 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
       const pairOptions0 = getPossibleValues(pairValues[0]);
       const pairOptions1 = getPossibleValues(pairValues[1]);
 
-      let currentMaxRank = -1;
-      let currentMaxPairSum = -1;
-      let bestPairConfig: number[] = [];
-
       for (const p0 of pairOptions0) {
         for (const p1 of pairOptions1) {
           const sum = p0 + p1;
           const rank = getRank(sum);
-          if (rank > currentMaxRank) {
-            currentMaxRank = rank;
-            currentMaxPairSum = sum;
-            bestPairConfig = [p0, p1];
-          } else if (rank === currentMaxRank) {
-            // Tie-break with sum if needed (though usually rank is all that matters)
-            if (sum > currentMaxPairSum) {
-              currentMaxPairSum = sum;
-              bestPairConfig = [p0, p1];
+          const isPair = p0 === p1;
+
+          // Calculate comparison score
+          // Priority 1: Niu Niu (Rank 10) - Score 2000+
+          // Priority 2: Pair (Double) - Score 1000+ (beats Niu 9 which is ~90)
+          // Priority 3: Rank - Score * 10
+          // Tie-break: Sum
+
+          let currentScore = 0;
+          if (rank === 10) currentScore += 2000;
+          if (isPair) currentScore += 1000;
+          currentScore += rank * 10;
+          currentScore += sum / 100; // Tiny tie-breaker
+
+          if (currentScore > maxScore) {
+            maxScore = currentScore;
+
+            const finalNiuRank = rank === 10 ? 0 : rank; // UI expects 0 for Niu Niu
+
+            let handType = "";
+            let handTypeZh = "";
+            let description = "";
+            let descriptionZh = "";
+
+            if (finalNiuRank === 0) {
+              if (isPair) {
+                handType = "Niu Niu (Double)";
+                handTypeZh = `牛牛 (${p0}对)`;
+                description = `Result is Niu Niu! And it's a Double ${p0}s!`;
+                descriptionZh = `牛牛！而且是${p0}对子！`;
+              } else {
+                handType = "Niu Niu";
+                handTypeZh = "牛牛";
+                description = "Both groups sum to multiples of 10!";
+                descriptionZh = "两组都是10的倍数！";
+              }
+            } else {
+              if (isPair) {
+                handType = `Niu ${finalNiuRank} (Double)`;
+                handTypeZh = `牛${finalNiuRank} (${p0}对)`;
+                description = `Double ${p0}s (Sum ${sum}), beats Niu 9!`;
+                descriptionZh = `${p0}对 (总和${sum})，大过牛9！`;
+              } else {
+                handType = `Niu ${finalNiuRank}`;
+                handTypeZh = `牛${finalNiuRank}`;
+                description = `Three cards sum to 10, remaining cards sum to ${sum}`;
+                descriptionZh = `三张牌总和为10的倍数，剩余两张总和为${sum}`;
+              }
             }
+
+            bestResult = {
+              hasNiu: true,
+              niuRank: finalNiuRank,
+              handType,
+              handTypeZh,
+              description,
+              descriptionZh,
+              threeCardGroup: validBaseConfig,
+              twoCardGroup: [p0, p1],
+              score: Math.floor(rank === 10 ? 1000 : 900 + rank * 10), // Keep standard score for UI display or bump it?
+              // Standard score is for betting calculation. Usually Pair doesn't change multiplier unless it's a special rule.
+              // I'll keep the standard score calculation for now, but the SELECTION logic uses maxScore.
+            };
           }
-        }
-      }
-
-      // Check if this split is better than global best
-      if (currentMaxRank > maxRank) {
-        maxRank = currentMaxRank;
-        maxPairSum = currentMaxPairSum;
-
-        // Construct Result
-        const niuRank = maxRank === 10 ? 0 : maxRank; // Convert back to 0 for Niu Niu in result interface if needed?
-        // Wait, the interface says "niuRank: number; // 0-10 (10 = Niu Niu)"?
-        // Looking at previous code: "if (result.niuRank === 0 && result.hasNiu) return "🐂";"
-        // Previous code logic: "const niuRank = twoCardSum % 10;" -> so 10, 20 became 0.
-        // And "if (niuRank === 0) { handType = "Niu Niu"; ... score: 1000 }"
-        // BUT type definition says "niuRank: number; // 0-10 (10 = Niu Niu)"?
-        // The type comment might be slightly misleading or I should align with it.
-        // Let's stick to the previous code's convention: 0 implies Niu Niu (Multiple of 10). 1-9 are normal.
-        // EXCEPT: The user might have meant 10.
-        // Let's look at `evaluateNiuNiuHand` previous implementation: `const niuRank = twoCardSum % 10;`.
-        // So 0 was indeed Niu Niu.
-        // I will stick to returning 0 for Niu Niu to avoid breaking UI that expects 0.
-
-        const finalNiuRank = currentMaxRank === 10 ? 0 : currentMaxRank;
-
-        let handType = "";
-        let handTypeZh = "";
-        let description = "";
-        let descriptionZh = "";
-
-        if (finalNiuRank === 0) {
-          handType = "Niu Niu";
-          handTypeZh = "牛牛";
-          description = "Both groups sum to multiples of 10!";
-          descriptionZh = "两组都是10的倍数！";
-        } else {
-          handType = `Niu ${finalNiuRank}`;
-          handTypeZh = `牛${finalNiuRank}`;
-          description = `Three cards sum to 10, remaining cards sum to ${currentMaxPairSum}`;
-          descriptionZh = `三张牌总和为10的倍数，剩余两张总和为${currentMaxPairSum}`;
-        }
-
-        bestResult = {
-          hasNiu: true,
-          niuRank: finalNiuRank,
-          handType,
-          handTypeZh,
-          description,
-          descriptionZh,
-          threeCardGroup: validBaseConfig, // This now contains the EFFECTIVE values (e.g. 6 instead of 3)
-          twoCardGroup: bestPairConfig, // EFFECTIVE values
-          score: finalNiuRank === 0 ? 1000 : 900 + finalNiuRank * 10,
-        };
-      } else if (currentMaxRank === maxRank) {
-        // Same rank found.
-        // If we already have a Niu Niu, we stick with it.
-        // Maybe check for "BIGGEST that can form double"?
-        // If Rank is same, maybe prefer highest pair sum?
-        if (currentMaxPairSum > maxPairSum) {
-          maxPairSum = currentMaxPairSum;
-          // Update bestResult ... (similar block as above)
-          // For Brevity, I wont repeat safely unless I refactor.
-          // Actually, since I need to construct the object, I should just assign it.
-          const finalNiuRank = currentMaxRank === 10 ? 0 : currentMaxRank;
-          bestResult = {
-            hasNiu: true,
-            niuRank: finalNiuRank,
-            handType: `Niu ${finalNiuRank === 0 ? "Niu" : finalNiuRank}`,
-            handTypeZh: finalNiuRank === 0 ? "牛牛" : `牛${finalNiuRank}`,
-            description:
-              finalNiuRank === 0
-                ? "Both groups sum to multiples of 10!"
-                : `Three cards sum to 10, remaining cards sum to ${currentMaxPairSum}`,
-            descriptionZh:
-              finalNiuRank === 0
-                ? "两组都是10的倍数！"
-                : `三张牌总和为10的倍数，剩余两张总和为${currentMaxPairSum}`,
-            threeCardGroup: validBaseConfig,
-            twoCardGroup: bestPairConfig,
-            score: finalNiuRank === 0 ? 1000 : 900 + finalNiuRank * 10,
-          };
         }
       }
     }
