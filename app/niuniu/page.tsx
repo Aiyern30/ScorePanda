@@ -168,10 +168,14 @@ const NiuNiuGame: React.FC = () => {
     return "😢";
   };
 
-  const checkMatch = (cardVal: number, targetVal: number) => {
-    if (cardVal === targetVal) return true;
-    if (cardVal === 3 && targetVal === 6) return true;
-    if (cardVal === 6 && targetVal === 3) return true;
+  const isCardMatch = (card: CardType, target: Value | number) => {
+    if (typeof target === "string") {
+      return card.value === target;
+    }
+    // Fallback for numeric (legacy or flexible)
+    if (card.numericValue === target) return true;
+    if (card.numericValue === 3 && target === 6) return true;
+    if (card.numericValue === 6 && target === 3) return true;
     return false;
   };
 
@@ -180,42 +184,19 @@ const NiuNiuGame: React.FC = () => {
     const base: CardType[] = [];
     const pair: CardType[] = [];
 
-    // Prioritize numeric 10s for Base over Face Cards, so Face Cards stay in Pair
-    const sortPriority = (v: Value) => {
-      if (v === "10") return 0;
-      if (["J", "Q", "K"].includes(v)) return 1;
-      return 0;
-    };
-
-    // Find Base Cards
+    // Find Base Cards (Exact Match from Result)
     for (const val of res.threeCardGroup) {
-      // Find all matches
-      const matchIndices = available
-        .map((c, i) => (checkMatch(c.numericValue, val) ? i : -1))
-        .filter((i) => i !== -1);
-
-      if (matchIndices.length > 0) {
-        // Pick best match (prefer numeric 10 for Base)
-        let bestIdx = matchIndices[0];
-        if (val === 10) {
-          // Sort matches by priority: 0 (Numeric 10) comes before 1 (Face)
-          matchIndices.sort(
-            (a, b) =>
-              sortPriority(available[a].value) -
-              sortPriority(available[b].value)
-          );
-          bestIdx = matchIndices[0];
-        }
-
-        base.push(available[bestIdx]);
-        available.splice(bestIdx, 1);
+      const idx = available.findIndex((c) => isCardMatch(c, val));
+      if (idx !== -1) {
+        base.push(available[idx]);
+        available.splice(idx, 1);
       }
     }
 
     // Find Pair Cards (remaining)
     pair.push(...available);
 
-    // Sort pair: Ace first, then Face, then Number
+    // Sort pair: Ace first
     pair.sort((a, b) => {
       if (a.value === "A") return -1;
       if (b.value === "A") return 1;
@@ -292,19 +273,11 @@ const NiuNiuGame: React.FC = () => {
                   if (result && result.hasNiu) {
                     // Highlight three-card group in gold
                     // Use checks that allow 3/6 swapping
-                    const checkMatch = (cardVal: number, targetVal: number) => {
-                      if (cardVal === targetVal) return true;
-                      if (cardVal === 3 && targetVal === 6) return true;
-                      if (cardVal === 6 && targetVal === 3) return true;
-                      return false;
-                    };
-
                     const usedThreeIndices: number[] = [];
                     result.threeCardGroup.forEach((val) => {
                       const foundIdx = selectedCards.findIndex(
                         (c, i) =>
-                          checkMatch(c.numericValue, val) &&
-                          !usedThreeIndices.includes(i)
+                          isCardMatch(c, val) && !usedThreeIndices.includes(i)
                       );
                       if (foundIdx !== -1) usedThreeIndices.push(foundIdx);
                     });

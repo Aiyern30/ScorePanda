@@ -27,8 +27,8 @@ export interface NiuNiuResult {
   handTypeZh: string;
   description: string;
   descriptionZh: string;
-  threeCardGroup: number[];
-  twoCardGroup: number[];
+  threeCardGroup: (Value | number)[];
+  twoCardGroup: (Value | number)[];
   score: number; // For comparison
   alternatives?: NiuNiuResult[];
 }
@@ -108,7 +108,8 @@ function checkSpecialHands(cards: Card[]): NiuNiuResult | null {
 
   // Spade Ace Special (Spade A + 4 Tens/Face Cards, MUST include at least one Face Card)
   const spadeAce = cards.find((c) => c.suit === "spades" && c.value === "A");
-  const tenCount = numericValues.filter((v) => v === 10).length;
+  const tenValueCards = cards.filter((c) => c.numericValue === 10);
+  const tenCount = tenValueCards.length;
   // Check if at least one card is actually a Face Card (J, Q, K)
   const hasFaceCard = values.some((v) => ["J", "Q", "K"].includes(v));
 
@@ -120,14 +121,14 @@ function checkSpecialHands(cards: Card[]): NiuNiuResult | null {
       handTypeZh: "至尊黑桃A",
       description: "Spade Ace with Face Card + Tens!",
       descriptionZh: "黑桃A配公仔牌 + 十！",
-      threeCardGroup: [10, 10, 10],
-      twoCardGroup: [1, 10], // Ace + Ten/Face
-      score: 2000,
+      threeCardGroup: tenValueCards.slice(0, 3).map((c) => c.value),
+      twoCardGroup: [spadeAce.value, tenValueCards[3].value], // Ace + Ten/Face
+      score: 5000,
     };
   }
 
   // Five Face Cards (炸弹 - Bomb)
-  const faceCards = values.filter((v) => ["J", "Q", "K"].includes(v));
+  const faceCards = cards.filter((c) => ["J", "Q", "K"].includes(c.value));
   if (faceCards.length === 5) {
     return {
       hasNiu: true,
@@ -136,9 +137,9 @@ function checkSpecialHands(cards: Card[]): NiuNiuResult | null {
       handTypeZh: "五花牛 (炸弹)",
       description: "All five cards are face cards!",
       descriptionZh: "五张牌都是公仔牌！",
-      threeCardGroup: [numericValues[0], numericValues[1], numericValues[2]],
-      twoCardGroup: [numericValues[3], numericValues[4]],
-      score: 1100,
+      threeCardGroup: faceCards.slice(0, 3).map((c) => c.value),
+      twoCardGroup: faceCards.slice(3, 5).map((c) => c.value),
+      score: 4500,
     };
   }
 
@@ -152,9 +153,9 @@ function checkSpecialHands(cards: Card[]): NiuNiuResult | null {
       handTypeZh: "五小牛",
       description: "All cards under 5 with sum ≤ 10!",
       descriptionZh: "五张牌都小于5且总和≤10！",
-      threeCardGroup: [numericValues[0], numericValues[1], numericValues[2]],
-      twoCardGroup: [numericValues[3], numericValues[4]],
-      score: 1200,
+      threeCardGroup: cards.slice(0, 3).map((c) => c.value),
+      twoCardGroup: cards.slice(3, 5).map((c) => c.value),
+      score: 4800,
     };
   }
 
@@ -200,6 +201,8 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
 
     const baseValues = baseIndices.map((i) => originalValues[i]);
     const pairValues = pairIndices.map((i) => originalValues[i]);
+    const baseCardValues = baseIndices.map((i) => cards[i].value); // Store actual face values
+    const pairCardValues = pairIndices.map((i) => cards[i].value);
 
     // Check if Base can resolve to multiple of 10
     const baseOptions0 = getPossibleValues(baseValues[0]);
@@ -248,14 +251,29 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
         for (const p1 of pairOptions1) {
           const sum = p0 + p1;
           const rank = getRank(sum);
-          const isPair = p0 === p1;
+          // Strict Pair check: visual values must match (e.g. K and K). Q and K is NOT a pair despite value 10.
+          const isStrictPair =
+            cards[pairIndices[0]].value === cards[pairIndices[1]].value;
+          // Note: p0 === p1 checks numeric equality (10===10). We rely on isStrictPair for "Double" status.
 
           // Comparison Score Logic
+          // Priority: Double (Strict) > Niu Niu > Normal
+          // Double Base: 3000
+          // Niu Niu Base: 2000
+          // Normal Base: 1000
           let comparisonScore = 0;
-          if (rank === 10) comparisonScore += 2000;
-          if (isPair) comparisonScore += 1000;
-          comparisonScore += rank * 10;
-          comparisonScore += sum / 100;
+          let rankScore = rank === 10 ? 10 : rank; // Treat Niu Niu as 10 for bonus
+
+          if (isStrictPair) {
+            comparisonScore += 3000;
+          } else if (rank === 10) {
+            comparisonScore += 2000;
+          } else {
+            comparisonScore += 1000;
+          }
+
+          comparisonScore += rankScore * 100; // Rank Bonus (100-1000)
+          comparisonScore += sum / 100; // Tie Breaker
 
           // Deduplicate based on effective values
           // Sort groups to ensure uniqueness
@@ -274,7 +292,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
             let descriptionZh = "";
 
             if (finalNiuRank === 0) {
-              if (isPair) {
+              if (isStrictPair) {
                 handType = "Niu Niu (Double)";
                 handTypeZh = `牛牛 (${p0}对)`;
                 description = `Result is Niu Niu! And it's a Double ${p0}s!`;
@@ -286,7 +304,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
                 descriptionZh = "两组都是10的倍数！";
               }
             } else {
-              if (isPair) {
+              if (isStrictPair) {
                 handType = `Niu ${finalNiuRank} (Double)`;
                 handTypeZh = `牛${finalNiuRank} (${p0}对)`;
                 description = `Double ${p0}s (Sum ${sum})`;
@@ -306,9 +324,9 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
               handTypeZh,
               description,
               descriptionZh,
-              threeCardGroup: validBaseConfig,
-              twoCardGroup: [p0, p1],
-              score: Math.floor(rank === 10 ? 1000 : 900 + rank * 10),
+              threeCardGroup: baseCardValues,
+              twoCardGroup: pairCardValues,
+              score: Math.floor(comparisonScore), // Use the new score system
               comparisonScore, // Internal use
             });
           }
