@@ -106,6 +106,26 @@ function checkSpecialHands(cards: Card[]): NiuNiuResult | null {
   const values = cards.map((c) => c.value);
   const numericValues = cards.map((c) => c.numericValue);
 
+  // Spade Ace Special (Spade A + 4 Tens/Face Cards, MUST include at least one Face Card)
+  const spadeAce = cards.find((c) => c.suit === "spades" && c.value === "A");
+  const tenCount = numericValues.filter((v) => v === 10).length;
+  // Check if at least one card is actually a Face Card (J, Q, K)
+  const hasFaceCard = values.some((v) => ["J", "Q", "K"].includes(v));
+
+  if (spadeAce && tenCount === 4 && hasFaceCard) {
+    return {
+      hasNiu: true,
+      niuRank: 13, // Highest
+      handType: "Supreme Spade Ace",
+      handTypeZh: "至尊黑桃A",
+      description: "Spade Ace with Face Card + Tens!",
+      descriptionZh: "黑桃A配公仔牌 + 十！",
+      threeCardGroup: [10, 10, 10],
+      twoCardGroup: [1, 10], // Ace + Ten/Face
+      score: 2000,
+    };
+  }
+
   // Five Face Cards (炸弹 - Bomb)
   const faceCards = values.filter((v) => ["J", "Q", "K"].includes(v));
   if (faceCards.length === 5) {

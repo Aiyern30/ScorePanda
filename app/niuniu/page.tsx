@@ -180,17 +180,47 @@ const NiuNiuGame: React.FC = () => {
     const base: CardType[] = [];
     const pair: CardType[] = [];
 
+    // Prioritize numeric 10s for Base over Face Cards, so Face Cards stay in Pair
+    const sortPriority = (v: Value) => {
+      if (v === "10") return 0;
+      if (["J", "Q", "K"].includes(v)) return 1;
+      return 0;
+    };
+
     // Find Base Cards
     for (const val of res.threeCardGroup) {
-      const idx = available.findIndex((c) => checkMatch(c.numericValue, val));
-      if (idx !== -1) {
-        base.push(available[idx]);
-        available.splice(idx, 1);
+      // Find all matches
+      const matchIndices = available
+        .map((c, i) => (checkMatch(c.numericValue, val) ? i : -1))
+        .filter((i) => i !== -1);
+
+      if (matchIndices.length > 0) {
+        // Pick best match (prefer numeric 10 for Base)
+        let bestIdx = matchIndices[0];
+        if (val === 10) {
+          // Sort matches by priority: 0 (Numeric 10) comes before 1 (Face)
+          matchIndices.sort(
+            (a, b) =>
+              sortPriority(available[a].value) -
+              sortPriority(available[b].value)
+          );
+          bestIdx = matchIndices[0];
+        }
+
+        base.push(available[bestIdx]);
+        available.splice(bestIdx, 1);
       }
     }
 
     // Find Pair Cards (remaining)
     pair.push(...available);
+
+    // Sort pair: Ace first, then Face, then Number
+    pair.sort((a, b) => {
+      if (a.value === "A") return -1;
+      if (b.value === "A") return 1;
+      return 0;
+    });
 
     return { base, pair };
   };
