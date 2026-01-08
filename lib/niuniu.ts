@@ -211,6 +211,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
 
     let validBaseConfig: number[] | null = null;
     let validBase = false;
+    let validBaseFlex = 999;
 
     // Check base validity
     for (const v0 of baseOptions0) {
@@ -222,24 +223,23 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
 
             // Should we continue to find other base configs for same cards?
             // Usually one valid base per combination is enough to define the split.
-            // But if 3(3) and 3(6) both work?
-            // E.g. 3, 3, 4. 3+3+4=10.
-            // If we stop, we might miss something?
-            // Actually, the pair determines the result.
-            // So if base is valid, we check pair.
-            // We should iterate ALL valid bases?
-            // "3, 3, 4" base. Pair X, Y.
-            // Result is determined by Pair.
-            // Does base configuration matter for result?
-            // Only for display "Base: 3+3+4".
-            // If multiple valid bases exist for SAME 3 cards, display doesn't change much.
-            // So finding FIRST valid base config for this combo is sufficient.
-            break;
+            const currentBaseFlex =
+              (v0 !== baseValues[0] ? 1 : 0) +
+              (v1 !== baseValues[1] ? 1 : 0) +
+              (v2 !== baseValues[2] ? 1 : 0);
+
+            // If we haven't found a valid base, or this one is more natural (less flex), pick it
+            if (
+              !validBase ||
+              currentBaseFlex < (validBaseConfig ? validBaseFlex : 999)
+            ) {
+              validBase = true;
+              validBaseConfig = [v0, v1, v2];
+              validBaseFlex = currentBaseFlex;
+            }
           }
         }
-        if (validBase) break;
       }
-      if (validBase) break;
     }
 
     if (validBase && validBaseConfig) {
@@ -254,7 +254,6 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
           // Strict Pair check: visual values must match (e.g. K and K). Q and K is NOT a pair despite value 10.
           const isStrictPair =
             cards[pairIndices[0]].value === cards[pairIndices[1]].value;
-          // Note: p0 === p1 checks numeric equality (10===10). We rely on isStrictPair for "Double" status.
 
           // Spade Ace + Face Card Bonus Logic
           const pCard0 = cards[pairIndices[0]];
@@ -266,6 +265,11 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
             ["J", "Q", "K"].includes(pCard0.value) ||
             ["J", "Q", "K"].includes(pCard1.value);
           const isSpadeAceFacePair = hasSpadeAce && hasFaceInPair;
+
+          // Flex Calculation
+          const pairFlex =
+            (p0 !== pairValues[0] ? 1 : 0) + (p1 !== pairValues[1] ? 1 : 0);
+          const totalFlex = validBaseFlex + pairFlex;
 
           // Comparison Score Logic
           // Priority: Supreme Spade Ace > Double (Strict) > Niu Niu > Normal
@@ -288,6 +292,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
 
           comparisonScore += rankScore * 100; // Rank Bonus (100-1000)
           comparisonScore += sum / 100; // Tie Breaker
+          comparisonScore -= totalFlex * 0.1; // Penalize Flexible usage lightly
 
           // Deduplicate based on effective values
           // Sort groups to ensure uniqueness
@@ -295,7 +300,7 @@ export function evaluateNiuNiuHand(cards: Card[]): NiuNiuResult {
           const pGroup = [p0, p1].sort((a, b) => a - b);
           const uniqueKey = `B:${tGroup.join(",")}|P:${pGroup.join(
             ","
-          )}|S:${isStrictPair}`;
+          )}|S:${isStrictPair}|F:${totalFlex}`;
 
           if (!startKeys.has(uniqueKey)) {
             startKeys.add(uniqueKey);
