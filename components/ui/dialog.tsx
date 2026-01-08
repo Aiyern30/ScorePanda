@@ -311,9 +311,19 @@ export function RulesDialog({
         </h3>
         <div className="space-y-2 text-gray-700 text-sm">
           <div className="flex items-center gap-2">
+            <span className="text-xl">👑</span>
+            <div>
+              <strong>至尊黑桃A (5000分):</strong> 有效牌型且对子含黑桃A+公仔牌
+              <br />
+              <span className="text-gray-600">
+                Supreme Spade Ace: Valid Hand with Pair of Spade Ace + Face Card
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
             <span className="text-xl">💎</span>
             <div>
-              <strong>五小牛 (1200分):</strong> 五张牌都小于5且总和≤10
+              <strong>五小牛 (4800分):</strong> 五张牌都小于5且总和≤10
               <br />
               <span className="text-gray-600">
                 Five Small: All cards under 5, sum ≤ 10
@@ -323,7 +333,7 @@ export function RulesDialog({
           <div className="flex items-center gap-2">
             <span className="text-xl">💎</span>
             <div>
-              <strong>五花牛/炸弹 (1100分):</strong> 五张都是J/Q/K
+              <strong>五花牛/炸弹 (4500分):</strong> 五张都是J/Q/K
               <br />
               <span className="text-gray-600">Five Face Cards: All J/Q/K</span>
             </div>
@@ -331,7 +341,17 @@ export function RulesDialog({
           <div className="flex items-center gap-2">
             <span className="text-xl">🐂</span>
             <div>
-              <strong>牛牛 (1000分):</strong> 两组都是10的倍数
+              <strong>牛牛 (Double) (3000分+):</strong> 严格对子 (如 K-K)
+              <br />
+              <span className="text-gray-600">
+                Double: Strict Pair (e.g. K-K) beats Mixed Pair
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🐂</span>
+            <div>
+              <strong>牛牛 (2000分):</strong> 两组都是10的倍数
               <br />
               <span className="text-gray-600">
                 Niu Niu: Both groups sum to multiples of 10
@@ -341,10 +361,10 @@ export function RulesDialog({
           <div className="flex items-center gap-2">
             <span className="text-xl">🔥</span>
             <div>
-              <strong>牛9 (990分):</strong> 剩余两张总和为19或29
+              <strong>牛9 (1900分):</strong> 剩余两张总和为9/19/29
               <br />
               <span className="text-gray-600">
-                Niu 9: Remaining cards sum to 19 or 29
+                Niu 9: Remaining cards sum to 9/19/29
               </span>
             </div>
           </div>
@@ -367,6 +387,38 @@ export function RulesDialog({
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
+        <h3 className="text-xl font-bold text-red-700 mb-2">
+          ✨ 特殊规则 / Special Rules
+        </h3>
+        <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm">
+          <li>
+            <strong>对子优先 / Double Priority:</strong>
+            严格对子 (如 J-J) 比混合对子 (如 Q-J)大。
+            <br />
+            <span className="text-gray-500 pl-4">
+              Strict Pairs (J-J) beat Mixed Pairs (Q-J).
+            </span>
+          </li>
+          <li>
+            <strong>天然优先 / Natural Priority:</strong>
+            优先使用天然点数 (如 4+6) 而非变身点数 (如 4+3变6)。
+            <br />
+            <span className="text-gray-500 pl-4">
+              Natural sums favored over flexible sums.
+            </span>
+          </li>
+          <li>
+            <strong>3/6互通 / Flexible 3/6:</strong>
+            如果需要，3可以当6用，6可以当3用。
+            <br />
+            <span className="text-gray-500 pl-4">
+              3 acts as 6, 6 acts as 3 if needed.
+            </span>
+          </li>
+        </ul>
       </div>
 
       <div className="bg-white p-4 rounded-lg border-2 border-yellow-400">
