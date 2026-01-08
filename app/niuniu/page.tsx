@@ -154,6 +154,33 @@ const NiuNiuGame: React.FC = () => {
     return "😢";
   };
 
+  const checkMatch = (cardVal: number, targetVal: number) => {
+    if (cardVal === targetVal) return true;
+    if (cardVal === 3 && targetVal === 6) return true;
+    if (cardVal === 6 && targetVal === 3) return true;
+    return false;
+  };
+
+  const getDisplayCards = (res: NiuNiuResult) => {
+    const available = [...selectedCards];
+    const base: CardType[] = [];
+    const pair: CardType[] = [];
+
+    // Find Base Cards
+    for (const val of res.threeCardGroup) {
+      const idx = available.findIndex((c) => checkMatch(c.numericValue, val));
+      if (idx !== -1) {
+        base.push(available[idx]);
+        available.splice(idx, 1);
+      }
+    }
+
+    // Find Pair Cards (remaining)
+    pair.push(...available);
+
+    return { base, pair };
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-red-600 via-red-700 to-yellow-600 p-4 sm:p-8 relative overflow-hidden">
       {/* Decorative background elements */}
@@ -317,14 +344,26 @@ const NiuNiuGame: React.FC = () => {
                 {result.hasNiu && (
                   <div className="mt-4 grid grid-cols-1 gap-4">
                     {/* Swapped order: Two Cards (Red) First/Top */}
-                    <div className="bg-red-100 p-3 rounded-lg border-2 border-red-400 shadow-inner">
-                      <h3 className="font-bold text-red-700 mb-1">
+                    <div className="bg-red-100 p-3 sm:p-4 rounded-lg border-2 border-red-400 shadow-inner overflow-visible">
+                      <h3 className="font-bold text-red-700 mb-2">
                         两张牌组 (Double)
                       </h3>
-                      {/* Simplified Display: Just Values */}
-                      <p className="text-4xl font-black text-red-800 tracking-wider">
-                        {result.twoCardGroup.join(" ")}
-                      </p>
+                      {/* Visual Cards Display */}
+                      <div className="flex justify-center gap-2 sm:gap-4 my-2">
+                        {getDisplayCards(result).pair.map((card, idx) => (
+                          <div
+                            key={idx}
+                            className="transform hover:scale-110 transition-transform"
+                          >
+                            <PlayingCard
+                              suit={card.suit}
+                              value={card.value}
+                              isHighlighted={true}
+                              highlightColor="red"
+                            />
+                          </div>
+                        ))}
+                      </div>
                       <p className="text-sm text-red-600 font-semibold mt-1">
                         {result.handType.includes("Double") ||
                         result.niuRank === 0
@@ -335,14 +374,26 @@ const NiuNiuGame: React.FC = () => {
                     </div>
 
                     {/* Three Cards (Yellow) Second/Bottom */}
-                    <div className="bg-yellow-100 p-3 rounded-lg border-2 border-yellow-400 shadow-inner">
-                      <h3 className="font-bold text-yellow-800 mb-1">
+                    <div className="bg-yellow-100 p-3 sm:p-4 rounded-lg border-2 border-yellow-400 shadow-inner overflow-visible">
+                      <h3 className="font-bold text-yellow-800 mb-2">
                         三张牌组 (Base)
                       </h3>
-                      {/* Simplified Display: Just Values */}
-                      <p className="text-3xl font-black text-yellow-900 tracking-wider">
-                        {result.threeCardGroup.join(" ")}
-                      </p>
+                      {/* Visual Cards Display */}
+                      <div className="flex justify-center gap-2 sm:gap-4 my-2">
+                        {getDisplayCards(result).base.map((card, idx) => (
+                          <div
+                            key={idx}
+                            className="transform hover:scale-110 transition-transform"
+                          >
+                            <PlayingCard
+                              suit={card.suit}
+                              value={card.value}
+                              isHighlighted={true}
+                              highlightColor="gold"
+                            />
+                          </div>
+                        ))}
+                      </div>
                       <p className="text-sm text-yellow-800 font-semibold mt-1">
                         Multiple of 10
                       </p>
