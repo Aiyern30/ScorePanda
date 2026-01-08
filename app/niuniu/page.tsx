@@ -21,6 +21,7 @@ interface PlayingCardProps {
   isHighlighted?: boolean;
   highlightColor?: "red" | "gold";
   onClick?: () => void;
+  size?: "normal" | "small";
 }
 
 // Playing Card Component
@@ -31,6 +32,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   isHighlighted = false,
   highlightColor = "gold",
   onClick,
+  size = "normal",
 }) => {
   const suitSymbols = {
     hearts: "♥",
@@ -47,14 +49,30 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   };
 
   const highlightClasses = {
-    red: "ring-4 ring-red-500 shadow-2xl shadow-red-500/50 scale-105",
-    gold: "ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/50 scale-105",
+    red:
+      size === "small"
+        ? "ring-2 ring-red-500 shadow-md"
+        : "ring-4 ring-red-500 shadow-2xl shadow-red-500/50 scale-105",
+    gold:
+      size === "small"
+        ? "ring-2 ring-yellow-400 shadow-md"
+        : "ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/50 scale-105",
   };
+
+  const sizeClasses =
+    size === "small"
+      ? "w-10 h-14 rounded border"
+      : "w-16 h-24 sm:w-20 sm:h-28 rounded-lg border-2";
+
+  const cornerTextSize =
+    size === "small" ? "text-[10px]" : "text-xs sm:text-sm";
+  const centerTextSize = size === "small" ? "text-xl" : "text-3xl sm:text-4xl";
+  const symbolSize = size === "small" ? "text-xs" : "text-base sm:text-lg";
 
   return (
     <div
       onClick={onClick}
-      className={`relative w-16 h-24 sm:w-20 sm:h-28 bg-linear-to-br from-yellow-50 to-white rounded-lg border-2 shadow-md transition-all duration-300 ${
+      className={`relative ${sizeClasses} bg-linear-to-br from-yellow-50 to-white shadow-md transition-all duration-300 ${
         onClick ? "cursor-pointer hover:scale-105" : ""
       } ${
         isSelected
@@ -63,28 +81,24 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
       } ${isHighlighted ? highlightClasses[highlightColor] : ""}`}
     >
       <div
-        className="absolute top-0.5 left-0.5 sm:top-1 sm:left-1 text-xs sm:text-sm font-bold"
+        className={`absolute top-0.5 left-0.5 ${cornerTextSize} font-bold`}
         style={{ color: suitColors[suit] }}
       >
         <div>{value}</div>
-        <div className="text-base sm:text-lg leading-none">
-          {suitSymbols[suit]}
-        </div>
+        <div className={`${symbolSize} leading-none`}>{suitSymbols[suit]}</div>
       </div>
       <div
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl sm:text-4xl"
+        className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${centerTextSize}`}
         style={{ color: suitColors[suit] }}
       >
         {suitSymbols[suit]}
       </div>
       <div
-        className="absolute bottom-0.5 right-0.5 sm:bottom-1 sm:right-1 text-xs sm:text-sm font-bold rotate-180"
+        className={`absolute bottom-0.5 right-0.5 ${cornerTextSize} font-bold rotate-180`}
         style={{ color: suitColors[suit] }}
       >
         <div>{value}</div>
-        <div className="text-base sm:text-lg leading-none">
-          {suitSymbols[suit]}
-        </div>
+        <div className={`${symbolSize} leading-none`}>{suitSymbols[suit]}</div>
       </div>
     </div>
   );
@@ -342,106 +356,132 @@ const NiuNiuGame: React.FC = () => {
                 </Alert>
 
                 {result.hasNiu && (
-                  <div className="mt-4 grid grid-cols-1 gap-4">
-                    {/* Swapped order: Two Cards (Red) First/Top */}
-                    <div className="bg-red-100 p-3 sm:p-4 rounded-lg border-2 border-red-400 shadow-inner overflow-visible">
-                      <h3 className="font-bold text-red-700 mb-2">
-                        两张牌组 (Double)
-                      </h3>
-                      {/* Visual Cards Display */}
-                      <div className="flex justify-center gap-2 sm:gap-4 my-2">
-                        {getDisplayCards(result).pair.map((card, idx) => (
-                          <div
-                            key={idx}
-                            className="transform hover:scale-110 transition-transform"
-                          >
-                            <PlayingCard
-                              suit={card.suit}
-                              value={card.value}
-                              isHighlighted={true}
-                              highlightColor="red"
-                            />
-                          </div>
-                        ))}
+                  <div className="mt-4">
+                    {/* Unified Result Container */}
+                    <div className="bg-red-50/90 rounded-2xl border-4 border-red-500 shadow-xl p-4 sm:p-6 overflow-visible relative">
+                      {/* Title Overlay */}
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-yellow-100 px-4 py-1 rounded-full font-bold shadow-lg text-sm sm:text-base whitespace-nowrap z-10">
+                        {result.handType} (Best Match)
                       </div>
-                      <p className="text-sm text-red-600 font-semibold mt-1">
-                        {result.handType.includes("Double") ||
-                        result.niuRank === 0
-                          ? "Double / Pair"
-                          : "Sum: " +
-                            result.twoCardGroup.reduce((a, b) => a + b, 0)}
-                      </p>
-                    </div>
 
-                    {/* Three Cards (Yellow) Second/Bottom */}
-                    <div className="bg-yellow-100 p-3 sm:p-4 rounded-lg border-2 border-yellow-400 shadow-inner overflow-visible">
-                      <h3 className="font-bold text-yellow-800 mb-2">
-                        三张牌组 (Base)
-                      </h3>
-                      {/* Visual Cards Display */}
-                      <div className="flex justify-center gap-2 sm:gap-4 my-2">
-                        {getDisplayCards(result).base.map((card, idx) => (
-                          <div
-                            key={idx}
-                            className="transform hover:scale-110 transition-transform"
-                          >
-                            <PlayingCard
-                              suit={card.suit}
-                              value={card.value}
-                              isHighlighted={true}
-                              highlightColor="gold"
-                            />
-                          </div>
-                        ))}
+                      <div className="flex flex-col items-center gap-4 mt-2">
+                        {/* Two Cards (Top) - Red */}
+                        <div className="flex justify-center gap-4">
+                          {getDisplayCards(result).pair.map((card, idx) => (
+                            <div
+                              key={idx}
+                              className="transform hover:scale-110 transition-transform duration-300 z-10"
+                            >
+                              <PlayingCard
+                                suit={card.suit}
+                                value={card.value}
+                                isHighlighted={true}
+                                highlightColor="red"
+                              />
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Separator / Plus */}
+                        {/* <div className="text-red-300 font-bold text-xl">+</div> */}
+
+                        {/* Three Cards (Bottom) - Yellow */}
+                        <div className="flex justify-center gap-4">
+                          {getDisplayCards(result).base.map((card, idx) => (
+                            <div
+                              key={idx}
+                              className="transform hover:scale-110 transition-transform duration-300"
+                            >
+                              <PlayingCard
+                                suit={card.suit}
+                                value={card.value}
+                                isHighlighted={true}
+                                highlightColor="gold"
+                              />
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <p className="text-sm text-yellow-800 font-semibold mt-1">
-                        Multiple of 10
-                      </p>
+
+                      <div className="mt-4 text-center">
+                        <p className="text-red-700 font-bold text-lg">
+                          Score: {result.score}
+                        </p>
+                      </div>
                     </div>
 
                     {/* Alternatives Button */}
                     {result.alternatives && result.alternatives.length > 0 && (
-                      <div className="mt-2">
+                      <div className="mt-6 text-center">
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-red-200" />
+                          </div>
+                          <div className="relative flex justify-center text-sm">
+                            <span className="bg-white/0 px-2 text-red-100">
+                              Or
+                            </span>
+                          </div>
+                        </div>
+
                         <Button
-                          variant="outline"
                           onClick={() => setShowAlternatives(!showAlternatives)}
-                          className="w-full border-dashed border-2 border-gray-400 text-gray-700 hover:bg-gray-100"
+                          className="mt-4 bg-linear-to-r from-red-800 to-red-900 border border-yellow-500 text-yellow-100 hover:text-white shadow-lg w-full sm:w-auto px-8"
                         >
                           {showAlternatives
-                            ? "Hide Other Ways"
-                            : `See Other Ways to Form Niu (${result.alternatives.length})`}
+                            ? "Hide Alternatives"
+                            : `See ${result.alternatives.length} Other Ways to Form Niu`}
                         </Button>
 
                         {showAlternatives && (
-                          <div className="mt-3 grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-top-2">
-                            {result.alternatives.map((alt, i) => (
-                              <div
-                                key={i}
-                                className="bg-white p-3 rounded-lg border border-gray-300 shadow-sm text-left"
-                              >
-                                <div className="font-bold text-gray-800 mb-1">
-                                  {alt.handTypeZh} ({alt.handType})
-                                </div>
-                                <div className="grid grid-cols-2 gap-2 text-sm">
-                                  <div className="bg-red-50 p-1 rounded border border-red-100 text-center">
-                                    <span className="text-red-500 font-bold block text-xs">
-                                      Double
-                                    </span>
-                                    <span className="font-bold">
-                                      {alt.twoCardGroup.join(" ")}
-                                    </span>
+                          <div className="mt-4 grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-top-4">
+                            {result.alternatives.map((alt, i) => {
+                              const displayAlt = getDisplayCards(alt);
+                              return (
+                                <div
+                                  key={i}
+                                  className="bg-white/95 p-3 rounded-xl border-2 border-red-100 shadow-md flex items-center justify-between gap-2"
+                                >
+                                  <div className="text-left">
+                                    <div className="font-bold text-red-800 text-sm sm:text-base">
+                                      {alt.handType}
+                                    </div>
+                                    <div className="text-xs text-red-500">
+                                      Score: {alt.score}
+                                    </div>
                                   </div>
-                                  <div className="bg-yellow-50 p-1 rounded border border-yellow-100 text-center">
-                                    <span className="text-yellow-600 font-bold block text-xs">
-                                      Base
-                                    </span>
-                                    <span className="font-bold text-gray-700">
-                                      {alt.threeCardGroup.join(" ")}
-                                    </span>
+
+                                  <div className="flex items-center gap-1 sm:gap-2">
+                                    {/* Pair */}
+                                    <div className="flex gap-1 bg-red-50 p-1 rounded border border-red-100">
+                                      {displayAlt.pair.map((c, idx) => (
+                                        <PlayingCard
+                                          key={idx}
+                                          suit={c.suit}
+                                          value={c.value}
+                                          isHighlighted={true}
+                                          highlightColor="red"
+                                          size="small"
+                                        />
+                                      ))}
+                                    </div>
+                                    {/* Base */}
+                                    <div className="flex gap-1 bg-yellow-50 p-1 rounded border border-yellow-100">
+                                      {displayAlt.base.map((c, idx) => (
+                                        <PlayingCard
+                                          key={idx}
+                                          suit={c.suit}
+                                          value={c.value}
+                                          isHighlighted={true}
+                                          highlightColor="gold"
+                                          size="small"
+                                        />
+                                      ))}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
