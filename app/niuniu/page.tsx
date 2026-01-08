@@ -215,11 +215,19 @@ const NiuNiuGame: React.FC = () => {
 
                   if (result && result.hasNiu) {
                     // Highlight three-card group in gold
+                    // Use checks that allow 3/6 swapping
+                    const checkMatch = (cardVal: number, targetVal: number) => {
+                      if (cardVal === targetVal) return true;
+                      if (cardVal === 3 && targetVal === 6) return true;
+                      if (cardVal === 6 && targetVal === 3) return true;
+                      return false;
+                    };
+
                     const usedThreeIndices: number[] = [];
                     result.threeCardGroup.forEach((val) => {
                       const foundIdx = selectedCards.findIndex(
                         (c, i) =>
-                          c.numericValue === val &&
+                          checkMatch(c.numericValue, val) &&
                           !usedThreeIndices.includes(i)
                       );
                       if (foundIdx !== -1) usedThreeIndices.push(foundIdx);
@@ -267,13 +275,10 @@ const NiuNiuGame: React.FC = () => {
             {result && result.hasNiu && (
               <div className="mt-4 text-center text-sm text-red-600">
                 <p>
-                  🟡 金色边框 = 三张牌组 (总和为10的倍数) / Gold = Three-card
-                  group (sum to 10)
+                  🔴 红色边框 = 两张牌组 (决定牛的大小) / Red = Double Pair
+                  (Rank)
                 </p>
-                <p>
-                  🔴 红色边框 = 两张牌组 (决定牛的大小) / Red = Two-card group
-                  (determines Niu rank)
-                </p>
+                <p>🟡 金色边框 = 三张牌组 (凑整) / Gold = Base (Sum to 10)</p>
               </div>
             )}
           </CardContent>
@@ -305,30 +310,35 @@ const NiuNiuGame: React.FC = () => {
                 </Alert>
 
                 {result.hasNiu && (
-                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-yellow-100 p-3 rounded-lg border-2 border-yellow-400">
+                  <div className="mt-4 grid grid-cols-1 gap-4">
+                    {/* Swapped order: Two Cards (Red) First/Top */}
+                    <div className="bg-red-100 p-3 rounded-lg border-2 border-red-400 shadow-inner">
                       <h3 className="font-bold text-red-700 mb-2">
-                        三张牌组 / Three Cards
-                      </h3>
-                      <p className="text-lg font-mono text-red-800">
-                        {result.threeCardGroup.join(" + ")} ={" "}
-                        {result.threeCardGroup.reduce((a, b) => a + b, 0)}
-                      </p>
-                      <p className="text-sm text-red-600 mt-1">
-                        (总和为10的倍数 / Sum to multiple of 10)
-                      </p>
-                    </div>
-                    <div className="bg-red-100 p-3 rounded-lg border-2 border-red-400">
-                      <h3 className="font-bold text-red-700 mb-2">
-                        两张牌组 / Two Cards
+                        两张牌组 (Double)
                       </h3>
                       <p className="text-lg font-mono text-red-800">
                         {result.twoCardGroup.join(" + ")} ={" "}
                         {result.twoCardGroup.reduce((a, b) => a + b, 0)}
                       </p>
                       <p className="text-sm text-red-600 mt-1">
-                        (个位数 = {result.niuRank} / Ones digit ={" "}
-                        {result.niuRank})
+                        (Rank Points:{" "}
+                        {result.niuRank === 0 ? "10 (Niu Niu)" : result.niuRank}
+                        )
+                      </p>
+                    </div>
+
+                    {/* Three Cards (Yellow) Second/Bottom */}
+                    <div className="bg-yellow-100 p-3 rounded-lg border-2 border-yellow-400 shadow-inner">
+                      <h3 className="font-bold text-red-700 mb-2">
+                        三张牌组 (Base)
+                      </h3>
+                      <p className="text-lg font-mono text-red-800">
+                        {result.threeCardGroup.join(" + ")} ={" "}
+                        {result.threeCardGroup.reduce((a, b) => a + b, 0)}
+                      </p>
+                      <p className="text-sm text-red-600 mt-1">
+                        (Sum: {result.threeCardGroup.reduce((a, b) => a + b, 0)}{" "}
+                        - Multiple of 10)
                       </p>
                     </div>
                   </div>
