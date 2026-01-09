@@ -181,6 +181,13 @@ const Card24Game: React.FC = () => {
     setSolutions([]);
   };
 
+  // Randomly select up to 5 unique cards from the deck
+  const pickRandomCards = () => {
+    const shuffled = [...deck].sort(() => Math.random() - 0.5);
+    setSelectedCards(shuffled.slice(0, 5));
+    setSolutions([]);
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-red-600 via-red-700 to-yellow-600 p-4 sm:p-8 relative overflow-hidden">
       {/* Decorative background elements */}
@@ -220,12 +227,20 @@ const Card24Game: React.FC = () => {
           <p className="text-lg sm:text-2xl text-yellow-200 font-semibold text-center">
             Number Calculation Game Solver
           </p>
-          <Button
-            onClick={() => setShowRules(true)}
-            className="mt-2 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-red-800 font-bold border-2 border-red-600 shadow-lg"
-          >
-            📖 游戏规则 / Rules
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full justify-center">
+            <Button
+              onClick={() => setShowRules(true)}
+              className="mt-2 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-red-800 font-bold border-2 border-red-600 shadow-lg"
+            >
+              📖 游戏规则 / Rules
+            </Button>
+            <Button
+              onClick={pickRandomCards}
+              className="mt-2 bg-yellow-500 hover:bg-yellow-600 text-red-800 font-bold border-2 border-yellow-700 shadow-lg"
+            >
+              🎲 随机选牌 / Random 5 Cards
+            </Button>
+          </div>
         </div>
 
         {/* Rules Dialog */}
@@ -271,7 +286,7 @@ const Card24Game: React.FC = () => {
                     onClick={() => handleCardClick(card)}
                   />
                 ))
-              )}{" "}
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">

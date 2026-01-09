@@ -153,6 +153,13 @@ const NiuNiuGame: React.FC = () => {
     setShowAlternatives(false);
   };
 
+  const pickRandomCards = () => {
+    const shuffled = [...deck].sort(() => Math.random() - 0.5);
+    setSelectedCards(shuffled.slice(0, 5));
+    setResult(null);
+    setShowAlternatives(false);
+  };
+
   const getResultColor = (result: NiuNiuResult) => {
     if (result.niuRank >= 11) return "from-purple-600 to-pink-600"; // Special hands
     if (result.niuRank === 0 && result.hasNiu)
@@ -247,12 +254,20 @@ const NiuNiuGame: React.FC = () => {
           <p className="text-lg sm:text-2xl text-yellow-200 font-semibold text-center">
             Niu Niu Card Game
           </p>
-          <Button
-            onClick={() => setShowRules(true)}
-            className="mt-2 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-red-800 font-bold border-2 border-red-600 shadow-lg"
-          >
-            📖 游戏规则 / Rules
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full justify-center">
+            <Button
+              onClick={() => setShowRules(true)}
+              className="mt-2 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-red-800 font-bold border-2 border-red-600 shadow-lg"
+            >
+              📖 游戏规则 / Rules
+            </Button>
+            <Button
+              onClick={pickRandomCards}
+              className="mt-2 bg-yellow-500 hover:bg-yellow-600 text-red-800 font-bold border-2 border-yellow-700 shadow-lg"
+            >
+              🎲 随机选牌 / Random 5 Cards
+            </Button>
+          </div>
         </div>
 
         {/* Rules Dialog */}
