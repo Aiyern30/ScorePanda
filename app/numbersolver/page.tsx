@@ -147,6 +147,10 @@ const Card24Game: React.FC = () => {
         selectedCards.filter((c) => `${c.suit}-${c.value}` !== cardKey)
       );
     } else {
+      if (selectedCards.length >= 5) {
+        alert("最多只能选择5张卡牌 / Maximum 5 cards allowed");
+        return;
+      }
       setSelectedCards([...selectedCards, card]);
     }
   };
@@ -235,10 +239,10 @@ const Card24Game: React.FC = () => {
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold mb-2 text-red-700">
-              🀄 已选卡牌 ({selectedCards.length})
+              🀄 已选卡牌 ({selectedCards.length}/5)
             </h2>
             <p className="text-xs sm:text-sm text-red-600 mb-4">
-              Selected Cards (minimum 2)
+              Selected Cards (minimum 2, maximum 5)
             </p>
             <div className="flex gap-2 sm:gap-4 mb-4 min-h-24 sm:min-h-32 items-center flex-wrap">
               {selectedCards.length === 0 ? (
