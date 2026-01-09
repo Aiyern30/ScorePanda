@@ -145,29 +145,31 @@ export default function Home() {
           </span>
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* NiuNiu Page Card */}
-          <div
-            onClick={() => router.push("/niuniu")}
-            className="cursor-pointer bg-linear-to-br from-red-500 to-red-700 shadow-2xl rounded-xl p-10 flex flex-col items-center justify-center text-2xl font-bold text-yellow-300 hover:scale-110 transition-all duration-300 border-4 border-yellow-400 hover:border-yellow-200 hover:shadow-yellow-300/50 hover:rotate-2 group"
-          >
-            <span className="text-5xl mb-3 group-hover:scale-125 transition-transform duration-300">
-              🐂
-            </span>
-            <span className="text-3xl">牛牛</span>
-            <span className="text-lg mt-2 opacity-90">NiuNiu</span>
-          </div>
+        <div className="mx-auto max-w-4xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* NiuNiu Page Card */}
+            <div
+              onClick={() => router.push("/niuniu")}
+              className="cursor-pointer bg-linear-to-br from-red-500 to-red-700 shadow-2xl rounded-xl p-10 flex flex-col items-center justify-center text-2xl font-bold text-yellow-300 hover:scale-110 transition-all duration-300 border-4 border-yellow-400 hover:border-yellow-200 hover:shadow-yellow-300/50 hover:rotate-2 group"
+            >
+              <span className="text-5xl mb-3 group-hover:scale-125 transition-transform duration-300">
+                🐂
+              </span>
+              <span className="text-3xl">牛牛</span>
+              <span className="text-lg mt-2 opacity-90">NiuNiu</span>
+            </div>
 
-          {/* NumberSolver Page Card */}
-          <div
-            onClick={() => router.push("/numbersolver")}
-            className="cursor-pointer bg-linear-to-br from-yellow-500 to-yellow-700 shadow-2xl rounded-xl p-10 flex flex-col items-center justify-center text-2xl font-bold text-red-700 hover:scale-110 transition-all duration-300 border-4 border-red-500 hover:border-red-300 hover:shadow-red-300/50 hover:-rotate-2 group"
-          >
-            <span className="text-5xl mb-3 group-hover:scale-125 transition-transform duration-300">
-              🔢
-            </span>
-            <span className="text-3xl">数字游戏</span>
-            <span className="text-lg mt-2 opacity-90">NumberSolver</span>
+            {/* NumberSolver Page Card */}
+            <div
+              onClick={() => router.push("/numbersolver")}
+              className="cursor-pointer bg-linear-to-br from-yellow-500 to-yellow-700 shadow-2xl rounded-xl p-10 flex flex-col items-center justify-center text-2xl font-bold text-red-700 hover:scale-110 transition-all duration-300 border-4 border-red-500 hover:border-red-300 hover:shadow-red-300/50 hover:-rotate-2 group"
+            >
+              <span className="text-5xl mb-3 group-hover:scale-125 transition-transform duration-300">
+                🔢
+              </span>
+              <span className="text-3xl">数字游戏</span>
+              <span className="text-lg mt-2 opacity-90">NumberSolver</span>
+            </div>
           </div>
         </div>
       </div>
