@@ -203,20 +203,20 @@ const Card24Game: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="max-w-6xl mx-auto relative z-10 px-4 sm:px-8 w-full">
+        <div className="flex flex-col md:flex-row items-center justify-center mb-4 sm:mb-8 gap-2 sm:gap-4">
+          <h1 className="text-3xl sm:text-5xl font-bold text-yellow-300 drop-shadow-lg mb-0 text-center md:text-left">
+            🎴 数字计算游戏 🎴
+          </h1>
+          <Button
+            type="button"
+            onClick={() => router.push("/")}
+            className="ml-0 md:ml-2 mt-2 md:mt-0 bg-yellow-400 hover:bg-yellow-500 text-red-800 font-bold px-4 py-2 rounded-lg border-2 border-red-600 shadow transition cursor-pointer text-base sm:text-lg"
+          >
+            ← 返回首页
+          </Button>
+        </div>
         <div className="flex flex-col items-center justify-center mb-4 sm:mb-8 gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <h1 className="text-3xl sm:text-5xl font-bold text-yellow-300 drop-shadow-lg mb-0">
-              🎴 数字计算游戏 🎴
-            </h1>
-            <Button
-              type="button"
-              onClick={() => router.push("/")}
-              className="ml-2 bg-yellow-400 hover:bg-yellow-500 text-red-800 font-bold px-4 py-2 rounded-lg border-2 border-red-600 shadow transition cursor-pointer text-base sm:text-lg"
-            >
-              ← 返回首页
-            </Button>
-          </div>
           <p className="text-lg sm:text-2xl text-yellow-200 font-semibold text-center">
             Number Calculation Game Solver
           </p>

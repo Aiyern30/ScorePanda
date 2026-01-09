@@ -134,7 +134,7 @@ export default function Home() {
       ))}
 
       {/* Main content */}
-      <div className="relative z-10">
+      <div className="relative z-10 px-4 sm:px-8 w-full">
         <h1 className="text-6xl font-bold text-center mb-12 text-yellow-300 drop-shadow-2xl animate-bounce-slow">
           <span className="inline-block animate-wiggle">🎊</span> 新年快乐{" "}
           <span
@@ -145,7 +145,7 @@ export default function Home() {
           </span>
         </h1>
 
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* NiuNiu Page Card */}
           <div
             onClick={() => router.push("/niuniu")}
