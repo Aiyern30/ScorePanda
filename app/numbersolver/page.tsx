@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { findDFSExpressions } from "@/lib/solver";
 import { RulesDialog } from "@/components/ui/dialog";
-
+import { toast } from "sonner";
 type Suit = "hearts" | "diamonds" | "clubs" | "spades";
 type Value =
   | "A"
@@ -148,7 +148,7 @@ const Card24Game: React.FC = () => {
       );
     } else {
       if (selectedCards.length >= 5) {
-        alert("最多只能选择5张卡牌 / Maximum 5 cards allowed");
+        toast.warning("最多只能选择5张卡牌 / Maximum 5 cards allowed");
         return;
       }
       setSelectedCards([...selectedCards, card]);
@@ -157,7 +157,7 @@ const Card24Game: React.FC = () => {
 
   const calculateSolutions = () => {
     if (selectedCards.length < 2) {
-      alert("请至少选择2张卡牌 / Please select at least 2 cards");
+      toast.warning("请至少选择2张卡牌 / Please select at least 2 cards");
       return;
     }
 
