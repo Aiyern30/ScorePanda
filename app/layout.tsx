@@ -13,8 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ScorePanda",
+  title: {
+    template: "%s | ScorePanda",
+    default: "ScorePanda",
+  },
   description: "ScorePanda - Track and play card games easily",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -24,10 +30,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <title>{metadata.title as string}</title>
-        <meta name="description" content={metadata.description as string} />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
