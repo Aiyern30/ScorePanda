@@ -323,16 +323,6 @@ export function RulesDialog({
           <div className="flex items-center gap-2">
             <span className="text-xl">💎</span>
             <div>
-              <strong>五小牛 (4800分):</strong> 五张牌都小于5且总和≤10
-              <br />
-              <span className="text-gray-600">
-                Five Small: All cards under 5, sum ≤ 10
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xl">💎</span>
-            <div>
               <strong>五花牛/炸弹 (4500分):</strong> 五张都是J/Q/K
               <br />
               <span className="text-gray-600">Five Face Cards: All J/Q/K</span>
@@ -410,14 +400,14 @@ export function RulesDialog({
               Natural sums favored over flexible sums.
             </span>
           </li>
-          <li>
-            <strong>3/6互通 / Flexible 3/6:</strong>
-            如果需要，3可以当6用，6可以当3用。
-            <br />
-            <span className="text-gray-500 pl-4">
-              3 acts as 6, 6 acts as 3 if needed.
-            </span>
-          </li>
+            <li>
+              <strong>3/6互换 / 3 and 6 Interchange:</strong>
+              在计算组合时，3可以当6用，6也可以当3用（如需要组成10的倍数时）。
+              <br />
+              <span className="text-gray-500 pl-4">
+                When forming combinations, 3 can be treated as 6 and 6 as 3 to help make multiples of 10.
+              </span>
+            </li>
         </ul>
       </div>
 
@@ -425,24 +415,24 @@ export function RulesDialog({
         <h3 className="text-xl font-bold text-red-700 mb-2">
           💡 示例 / Example
         </h3>
-        <p className="text-gray-700 mb-2">手牌：K♥, Q♦, 5♣, 3♠, 2♥</p>
-        <div className="bg-yellow-50 p-3 rounded border border-yellow-300">
-          <p className="font-semibold text-red-700 mb-1">
-            三张牌组 / Three-card group:
-          </p>
-          <p className="font-mono text-sm text-gray-700">
-            K(10) + Q(10) + 5 = 25 → 总和为10的倍数 ✓
-          </p>
-          <p className="font-semibold text-red-700 mt-2 mb-1">
-            两张牌组 / Two-card group:
-          </p>
-          <p className="font-mono text-sm text-gray-700">
-            3 + 2 = 5 → 个位数 = 5
-          </p>
-          <p className="font-bold text-red-600 mt-2">
-            结果 / Result: 牛5 (Niu 5)
-          </p>
-        </div>
+          <p className="text-gray-700 mb-2">手牌：K♥, Q♦, 5♣, 3♠, 2♥</p>
+          <div className="bg-yellow-50 p-3 rounded border border-yellow-300">
+            <p className="font-semibold text-red-700 mb-1">
+              三张牌组 / Three-card group:
+            </p>
+            <p className="font-mono text-sm text-gray-700">
+              K(10) + Q(10) + 5 = 25 → 总和为10的倍数 ✗ (应为30, 20, 10等)
+            </p>
+            <p className="font-semibold text-red-700 mt-2 mb-1">
+              两张牌组 / Two-card group:
+            </p>
+            <p className="font-mono text-sm text-gray-700">
+              3 + 2 = 5 → 个位数 = 5
+            </p>
+            <p className="font-bold text-red-600 mt-2">
+              结果 / Result: 无牛 (No Niu)
+            </p>
+          </div>
       </div>
 
       <div className="bg-linear-to-r from-red-100 to-yellow-100 p-4 rounded-lg border-2 border-red-400">
