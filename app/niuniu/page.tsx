@@ -13,6 +13,7 @@ import {
   type Value,
 } from "@/lib/niuniu";
 import { RulesDialog } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 interface PlayingCardProps {
   suit: Suit;
@@ -109,6 +110,7 @@ const NiuNiuGame: React.FC = () => {
   const [result, setResult] = useState<NiuNiuResult | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [showAlternatives, setShowAlternatives] = useState(false);
+  const router = useRouter();
 
   // Generate full deck
   const deck = generateDeck();
@@ -229,16 +231,25 @@ const NiuNiuGame: React.FC = () => {
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="text-center mb-4 sm:mb-8">
-          <h1 className="text-3xl sm:text-5xl font-bold text-yellow-300 drop-shadow-lg mb-1 sm:mb-2">
-            🐂 牛牛游戏 🐂
-          </h1>
-          <p className="text-lg sm:text-2xl text-yellow-200 font-semibold">
+        <div className="flex flex-col items-center justify-center mb-4 sm:mb-8 gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <h1 className="text-3xl sm:text-5xl font-bold text-yellow-300 drop-shadow-lg mb-0">
+              🐂 牛牛游戏 🐂
+            </h1>
+            <Button
+              type="button"
+              onClick={() => router.push("/")}
+              className="ml-2 bg-yellow-400 hover:bg-yellow-500 text-red-800 font-bold px-4 py-2 rounded-lg border-2 border-red-600 shadow transition cursor-pointer text-base sm:text-lg"
+            >
+              ← 返回首页
+            </Button>
+          </div>
+          <p className="text-lg sm:text-2xl text-yellow-200 font-semibold text-center">
             Niu Niu Card Game
           </p>
           <Button
             onClick={() => setShowRules(true)}
-            className="mt-4 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-red-800 font-bold border-2 border-red-600 shadow-lg"
+            className="mt-2 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-red-800 font-bold border-2 border-red-600 shadow-lg"
           >
             📖 游戏规则 / Rules
           </Button>
