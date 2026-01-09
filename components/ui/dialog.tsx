@@ -438,7 +438,9 @@ export function RulesDialog({
                   无牛 / No Niu (Score: 1)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">K♠, 8♥, 7♦, 4♣, 2♠</span>
+                <span className="font-mono text-sm">
+                  <span className="text-black">K♠</span>, <span className="text-red-600">8♥</span>, <span className="text-red-600">7♦</span>, <span className="text-black">4♣</span>, <span className="text-black">2♠</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 任意三张牌都无法凑成10的倍数
@@ -453,15 +455,22 @@ export function RulesDialog({
                   牛一 / Niu 1 (Score: 10)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">9♠, 6♥, 5♦, 7♣, 4♠</span>
+                <span className="font-mono text-sm">
+                  <span className="text-black">9♠</span>, <span className="text-red-600">6♥</span>, <span className="text-red-600">5♦</span>, <span className="text-black">7♣</span>, <span className="text-black">4♠</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
-                  • 三张牌组 (Base): 9+6+5 = 20 (凑整 ✓)
+                  • 三张牌组 (Base): 9+7+6(3) = 19 → 要凑20 ✗
                   <br />
-                  • 两张牌组 (Pair): 7+4 = 11 → 1点 = 牛一
+                  • ✓ 三张牌组 (Base): 9+7+4 = 20 (凑整 ✓)
                   <br />
-                  • Base group: 9+6+5 = 20 (multiple of 10)
-                  <br />• Pair: 7+4 = 11 → 1 point = Niu 1
+                  • ✓ 两张牌组 (Pair): 6+5 = 11 → 1点 = 牛一
+                  <br />
+                  • Base group: 9+7+4 = 20 (multiple of 10)
+                  <br />
+                  • Pair: 6+5 = 11 → 1 point = Niu 1
+                  <br />
+                  <strong className="text-orange-600">Note: 9+7+6(3) would give Niu 9 (better!)</strong>
                 </span>
               </div>
 
@@ -470,22 +479,22 @@ export function RulesDialog({
                   牛二 / Niu 2 (Score: 20)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">K♥, Q♦, 9♣, 8♠, 4♥</span>
+                <span className="font-mono text-sm">
+                  <span className="text-red-600">K♥</span>, <span className="text-red-600">Q♦</span>, <span className="text-black">9♣</span>, <span className="text-black">8♠</span>, <span className="text-red-600">4♥</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 三张牌组 (Base): K(10)+Q(10)+9 = 29 → 要凑30 ✗
                   <br />
-                  • 三张牌组 (Base): K(10)+9+8 = 27 → 要凑30 ✗
+                  • 三张牌组 (Base): K(10)+Q(10)+8 = 28 → 要凑30 ✗
                   <br />
-                  • 三张牌组 (Base): 9+8+K(10) = 27 → 要凑30 ✗
+                  • 三张牌组 (Base): K(10)+Q(10)+4 = 24 → 要凑30 ✗
                   <br />
-                  • ✓ 三张牌组 (Base): K(10)+8+Q(10) = 28 → 要凑30 ✗
+                  • <strong className="text-red-700">K、Q、J、10 在基础牌组中永远是10点</strong>
                   <br />
-                  • ✓ 三张牌组 (Base): 9+8+K(3) = 20 (凑整 ✓) [6和3可互換]
+                  • <strong className="text-red-700">K, Q, J, 10 are always 10 points in base group</strong>
                   <br />
-                  • 两张牌组 (Pair): Q(10)+4 = 14 → 4 → 要2点 ✗
-                  <br />• ✓ 两张牌组 (Pair): Q(6)+K(6) = 12 → 2点 = 牛二
-                  [10視為6]
+                  • <strong className="text-orange-600">此手牌 = 无牛 / This hand = No Niu</strong>
                 </span>
               </div>
 
@@ -494,14 +503,14 @@ export function RulesDialog({
                   牛三 / Niu 3 (Score: 30)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">J♠, 10♥, 7♦, 6♣, 3♠</span>
+                <span className="font-mono text-sm">
+                  <span className="text-black">J♠</span>, <span className="text-red-600">10♥</span>, <span className="text-red-600">7♦</span>, <span className="text-black">6♣</span>, <span className="text-black">3♠</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 三张牌组 (Base): J(10)+10+7 = 27 → 要凑30 ✗
                   <br />
                   • 三张牌组 (Base): J(10)+7+6 = 23 → 要凑30 ✗
-                  <br />
-                  • ✓ 三张牌组 (Base): J(10)+10+3 = 23 → 要凑30 ✗
                   <br />
                   • ✓ 三张牌组 (Base): J(3)+10+7 = 20 (凑整 ✓) [6和3可互換]
                   <br />
@@ -515,7 +524,9 @@ export function RulesDialog({
                   牛四 / Niu 4 (Score: 40)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">K♦, 9♠, 7♥, 5♣, 4♦</span>
+                <span className="font-mono text-sm">
+                  <span className="text-red-600">K♦</span>, <span className="text-black">9♠</span>, <span className="text-red-600">7♥</span>, <span className="text-black">5♣</span>, <span className="text-red-600">4♦</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 三张牌组 (Base): 9+7+4 = 20 (凑整 ✓)
@@ -537,7 +548,9 @@ export function RulesDialog({
                   牛五 / Niu 5 (Score: 50)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">Q♣, 8♠, 7♥, 6♦, 5♠</span>
+                <span className="font-mono text-sm">
+                  <span className="text-black">Q♣</span>, <span className="text-black">8♠</span>, <span className="text-red-600">7♥</span>, <span className="text-red-600">6♦</span>, <span className="text-black">5♠</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 三张牌组 (Base): 8+7+5 = 20 (凑整 ✓)
@@ -558,7 +571,9 @@ export function RulesDialog({
                   牛六 / Niu 6 (Score: 60)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">J♥, 9♦, 8♣, 7♠, 6♥</span>
+                <span className="font-mono text-sm">
+                  <span className="text-red-600">J♥</span>, <span className="text-red-600">9♦</span>, <span className="text-black">8♣</span>, <span className="text-black">7♠</span>, <span className="text-red-600">6♥</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 三张牌组 (Base): 9+8+J(3) = 20 (凑整 ✓)
@@ -575,7 +590,9 @@ export function RulesDialog({
                   牛七 / Niu 7 (Score: 70)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">K♠, J♥, 9♦, 8♣, 7♠</span>
+                <span className="font-mono text-sm">
+                  <span className="text-black">K♠</span>, <span className="text-red-600">J♥</span>, <span className="text-red-600">9♦</span>, <span className="text-black">8♣</span>, <span className="text-black">7♠</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 三张牌组 (Base): K(10)+J(10)+9 = 29 → 要凑30 ✗
@@ -590,7 +607,9 @@ export function RulesDialog({
                   牛八 / Niu 8 (Score: 80)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">9♠, 7♥, 4♦, 6♣, 2♠</span>
+                <span className="font-mono text-sm">
+                  <span className="text-black">9♠</span>, <span className="text-red-600">7♥</span>, <span className="text-red-600">4♦</span>, <span className="text-black">6♣</span>, <span className="text-black">2♠</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 三张牌组 (Base): 9+7+4 = 20 (凑整 ✓)
@@ -603,7 +622,9 @@ export function RulesDialog({
                   牛九 / Niu 9 (Score: 90)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">K♣, Q♠, 8♥, 5♦, 4♣</span>
+                <span className="font-mono text-sm">
+                  <span className="text-black">K♣</span>, <span className="text-black">Q♠</span>, <span className="text-red-600">8♥</span>, <span className="text-red-600">5♦</span>, <span className="text-black">4♣</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 三张牌组 (Base): K(10)+Q(10)+8 = 28 → 要凑30 ✗
@@ -622,7 +643,9 @@ export function RulesDialog({
                   牛牛 / Niu Niu (Score: 500)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">K♥, Q♦, 5♣, 3♠, 2♥</span>
+                <span className="font-mono text-sm">
+                  <span className="text-red-600">K♥</span>, <span className="text-red-600">Q♦</span>, <span className="text-black">5♣</span>, <span className="text-black">3♠</span>, <span className="text-red-600">2♥</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • ✓ 三张牌组 (Base): 5+3+2 = 10 (凑整 ✓)
@@ -643,7 +666,9 @@ export function RulesDialog({
                   葫芦牛 / Full House (Score: 4400)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">K♠, K♥, K♦, 7♣, 7♠</span>
+                <span className="font-mono text-sm">
+                  <span className="text-black">K♠</span>, <span className="text-red-600">K♥</span>, <span className="text-red-600">K♦</span>, <span className="text-black">7♣</span>, <span className="text-black">7♠</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 三张相同 + 两张相同
@@ -658,7 +683,9 @@ export function RulesDialog({
                   炸弹牛 / Four of a Kind (Score: 4600)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">Q♣, Q♠, Q♥, Q♦, 5♠</span>
+                <span className="font-mono text-sm">
+                  <span className="text-black">Q♣</span>, <span className="text-black">Q♠</span>, <span className="text-red-600">Q♥</span>, <span className="text-red-600">Q♦</span>, <span className="text-black">5♠</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 四张相同点数
@@ -673,7 +700,9 @@ export function RulesDialog({
                   五公牛 / Five Face Cards (Score: 4800)
                 </strong>
                 <br />
-                <span className="font-mono text-sm">K♠, K♥, Q♦, J♣, J♠</span>
+                <span className="font-mono text-sm">
+                  <span className="text-black">K♠</span>, <span className="text-red-600">K♥</span>, <span className="text-red-600">Q♦</span>, <span className="text-black">J♣</span>, <span className="text-black">J♠</span>
+                </span>
                 <br />
                 <span className="text-xs text-gray-600">
                   • 全部是公牌 (J, Q, K)
