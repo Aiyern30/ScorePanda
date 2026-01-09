@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
   description: "ScorePanda - Track and play card games easily",
   icons: {
-    icon: "/logo.png",
+    icon: "/Logo.png",
   },
 };
 
